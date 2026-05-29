@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { ICONS } from '../src/icons.js';
-import { dayCardHTML, shoppingRowHTML, mealRowHTML } from '../src/render.js';
+import { dayCardHTML, shoppingRowHTML, mealRowHTML, evaluateOverride } from '../src/render.js';
 
 const COOK_DAY = { day: 'Monday', mode: 'cook', locked: false,
   meal: { meal: 'Spaghetti', category: 'Italian', healthy: true } };
@@ -48,4 +48,22 @@ test('mealRowHTML lists name, category and where', () => {
   assert.match(html, /Tacos/);
   assert.match(html, /Mexican/);
   assert.match(html, /Either/);
+});
+
+test('evaluateOverride flags a duplicate category and eat-out overflow', () => {
+  const plan = { days: [
+    { day: 'Monday', mode: 'cook', meal: { meal: 'A', category: 'Italian', where: 'Home', healthy: false, ingredients: [] } },
+    { day: 'Tuesday', mode: 'eatout', meal: { meal: 'B', category: 'Japanese', where: 'Eat Out', healthy: false, ingredients: [] } },
+    { day: 'Wednesday', mode: 'eatout', meal: { meal: 'C', category: 'Mexican', where: 'Eat Out', healthy: false, ingredients: [] } },
+  ], relaxations: [], healthyCount: 0 };
+  // Overriding Monday with a Japanese meal -> clashes with Tuesday's category.
+  const dup = evaluateOverride(plan, 0, { meal: 'D', category: 'Japanese', where: 'Home' });
+  assert.match(dup, /category/i);
+  // Overriding Monday with a 3rd eat-out -> exceeds cap of 2.
+  const over = evaluateOverride(plan, 0, { meal: 'E', category: 'Greek', where: 'Eat Out' });
+  assert.match(over, /eat-out/i);
+  // A clean pick (category not used on any OTHER day) -> empty string.
+  assert.equal(evaluateOverride(plan, 0, { meal: 'F', category: 'Greek', where: 'Home' }), '');
+  // Replacing Monday's Italian with a different Italian is NOT a duplicate (same slot).
+  assert.equal(evaluateOverride(plan, 0, { meal: 'G', category: 'Italian', where: 'Home' }), '');
 });

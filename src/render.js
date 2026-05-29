@@ -65,11 +65,11 @@ export function mealRowHTML(meal) {
 
 // Inline warning string (empty = no warning) for replacing day `dayIndex` with `meal`.
 export function evaluateOverride(plan, dayIndex, meal) {
-  if (plan.days.some((d) => d.meal.category === meal.category)) {
+  const others = plan.days.filter((_, i) => i !== dayIndex);
+  if (others.some((d) => d.meal.category === meal.category)) {
     return `Heads up: ${meal.category} is already used this week (duplicate category).`;
   }
   if (meal.where === 'Eat Out') {
-    const others = plan.days.filter((_, i) => i !== dayIndex);
     const eatOut = others.filter((d) => d.mode === 'eatout').length;
     if (eatOut + 1 > RULE_DEFAULTS.maxEatOut) {
       return `Heads up: that's more than ${RULE_DEFAULTS.maxEatOut} eat-out nights.`;
