@@ -46,13 +46,17 @@ Google Sheet (published CSV)
                   (current plan · pantry staples · week history, synced both phones)
 ```
 
-- **Single-file app:** `index.html` (HTML/CSS/JS, no build step), hosted on **GitHub Pages**.
+- **No-build static app:** `index.html` + small `src/*.js` ES modules (no bundler, no
+  framework), hosted on **GitHub Pages**.
 - **Data:** the shared Google Sheet, published to the web as read-only CSV.
 - **Sync/state:** **Firebase Realtime Database**, path-scoped (same pattern as the
   health-tracker).
 
-> ℹ️ **Status:** documentation and design are complete; the app itself is not built yet.
-> Implementation starts at **Phase 0** in [ROADMAP.md](ROADMAP.md).
+> ✅ **Status:** **v0.1.0 — MVP shipped.** The full app is built: rule-respecting week
+> generator, per-day swap/lock/override with live rule warnings, deal suggestions on
+> eat-out nights, aisle-grouped shopping list with persistent staples, and optional
+> Firebase sync. See [CHANGELOG.md](CHANGELOG.md) for what shipped and
+> [ROADMAP.md](ROADMAP.md) for what's still ahead.
 
 ---
 
@@ -98,16 +102,39 @@ See [DESIGN-SYSTEM.md](DESIGN-SYSTEM.md) for the full visual language.
 
 ---
 
-## Setup *(once the app is built — see roadmap)*
+## Run it
 
-1. **Publish the Sheet:** in Google Sheets → *File → Share → Publish to web* (read-only),
-   for both tabs.
-2. **Create a Firebase project** with a Realtime Database; copy the web config into
-   `index.html`.
-3. **Deploy** `index.html` to GitHub Pages.
-4. **Add to home screen** on each phone for an app-like launch.
+No build step. Serve the folder with any static server and open it:
 
-Exact config steps will be finalized during Phase 0/5 and captured here.
+```bash
+python -m http.server 8000   # then open http://localhost:8000
+```
+
+The meals load live from the published Sheet on first paint.
+
+## Setup
+
+1. **Publish the Sheet** (already done): in Google Sheets → *File → Share → Publish to
+   web* (read-only). The app reads it as CSV via the gviz endpoint configured in
+   [`src/config.js`](src/config.js) (`SHEET_ID`). Add a **Deals** tab (columns: Day,
+   Restaurant, Deal, Notes) whenever you want eat-out deal suggestions — until then the
+   app just shows "Eat out" with no pill.
+2. **Cross-device sync (optional):** sync runs on Firebase Realtime Database. The config
+   lives in [`src/config.js`](src/config.js) as `FIREBASE_CONFIG`, path-scoped under
+   `FIREBASE_SCOPE` (`dinner/home`) so it shares the health-tracker project without
+   touching its data. Set `FIREBASE_CONFIG = null` for single-device (localStorage) mode.
+3. **Deploy:** push to GitHub and enable Pages (root). The `.nojekyll` file keeps
+   `/src/*.js` served verbatim. Live URL: `https://revel911.github.io/meal-planner/`.
+4. **Add to home screen** on each phone for an app-like, installable launch (PWA).
+
+### For contributors
+
+The pure logic (CSV parsing, the rule engine, shopping-list builder, store) is covered by
+dependency-free unit tests using Node's built-in runner:
+
+```bash
+npm test
+```
 
 ---
 

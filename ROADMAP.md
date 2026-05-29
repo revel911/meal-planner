@@ -9,66 +9,18 @@ until it earns a place (see [VISION.md](VISION.md) non-goals).
 
 ---
 
-## Phase 0 — Foundations *(next up)*
+## Shipped
 
-Get data flowing and the shell standing before any logic.
+Phases 0–5 (foundations, the generator, tweak & pivot, eat-out deals, shopping list,
+polish & ship) all landed in **v0.1.0**. See [CHANGELOG.md](CHANGELOG.md) for the detail.
 
-- [ ] Single-file `index.html` scaffold (HTML/CSS/JS, no build step) on the Fresh Kitchen
-      design system.
-- [ ] Publish the Google Sheet to the web (read-only) and confirm CSV endpoints for both
-      tabs (meals + deals).
-- [ ] Parse the **meals** CSV → `{ meal, category, ingredients[], where, healthy, notes }`.
-- [ ] Parse the **deals** CSV → `{ day, restaurant, deal, notes }`.
-- [ ] Firebase Realtime Database project + path-scoped config (mirror health-tracker setup).
-- [ ] App shell: bottom tab bar (Plan · Shopping · Meals), responsive column layout,
-      loading + error states for the Sheet fetch.
+## Next up *(small follow-ups on the shipped MVP)*
 
-## Phase 1 — The generator (the heart) *(MVP)*
-
-The rule-respecting week. This is the feature the whole app exists for.
-
-- [ ] Week model: Monday–Sunday, each day = a meal slot (or eat-out slot).
-- [ ] Rule engine, in priority order:
-  1. No meal repeated from the last saved week.
-  2. ≤ 2 eat-out days (Eat Out → must; Either → may; Home → never).
-  3. No duplicate Category within the week.
-  4. Healthy target (default ≥ 3/week, adjustable).
-- [ ] Graceful relaxation: when the meal list can't satisfy every rule, relax the
-      lowest-priority rule and surface a clear message about what was relaxed and why.
-- [ ] "Generate week" → renders the Accent-bar day cards.
-- [ ] Save the generated/edited plan to Firebase; load it on open.
-
-## Phase 2 — Tweak & pivot *(MVP)*
-
-Because life happens.
-
-- [ ] Per-day override dropdown (pick any eligible meal; live rule warnings shown inline).
-- [ ] "⟳ swap" — re-roll a single day within the rules.
-- [ ] "Re-roll" — regenerate all unlocked days.
-- [ ] Lock a day so re-roll leaves it alone.
-- [ ] Healthy progress indicator ("Healthy: 2/3") that updates as days change.
-
-## Phase 3 — Eat-out deals *(MVP)*
-
-- [ ] On eat-out days, match the day-of-week to the deals table and show the
-      restaurant/deal as a suggestion on the card (coral deal pill).
-- [ ] Handle empty deal cells gracefully (just show "Eat out" with no suggestion).
-
-## Phase 4 — Shopping list *(MVP)*
-
-- [ ] Derive the list from the week's planned (cook-at-home) meals' ingredients.
-- [ ] Dedupe identical ingredients across meals (and note which meals need each).
-- [ ] Group by aisle: Produce · Meat & Seafood · Pantry · Dairy · Other (keyword mapping).
-- [ ] Checkboxes for "already have"; persistent **staples** stay checked week-to-week,
-      perishables reset on each new plan.
-- [ ] Edit the staples set (mark/unmark an ingredient as a staple).
-
-## Phase 5 — Polish & ship *(MVP complete)*
-
-- [ ] Empty/edge states (no plan yet, Sheet unreachable, not enough meals for the rules).
-- [ ] PWA niceties: add-to-home-screen, app icon, offline read of the last saved plan.
-- [ ] Cross-device sync sanity check (both phones see the same plan in real time).
-- [ ] Deploy to GitHub Pages; write the "first run" setup steps into the README.
+- [ ] **Dedicated staples editor** — staples persist and stay checked today, but marking
+      an arbitrary ingredient as a staple is only lightly exposed. Add a clear toggle/affordance.
+- [ ] **Publish the Deals tab** in the Sheet so eat-out nights show restaurant/deal pills
+      (the app already matches and renders them when the tab exists).
+- [ ] **Two-device sync sanity check** on real phones now that Firebase is wired.
 
 ---
 

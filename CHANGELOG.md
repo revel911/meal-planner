@@ -10,7 +10,39 @@ project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+Nothing yet — see [ROADMAP.md](ROADMAP.md) for the next follow-ups.
+
+## [0.1.0] — 2026-05-29
+
+First working MVP. The app reads meals live from the shared Google Sheet, auto-generates a
+rule-respecting Monday–Sunday week, lets us tweak it, derives an aisle-grouped shopping
+list, and optionally syncs across devices. No build step; plain ES-module files served
+statically.
+
 ### Added
+- **Rule-respecting week generator** with the four rules in priority order and graceful
+  relaxation of the lowest-priority rule when the meal list can't satisfy all of them
+  (surfaced in a banner that says what was relaxed). Backtracking selection over the meals,
+  seedable for deterministic tests.
+- **Tweak & pivot:** per-day override dropdown with live inline rule warnings, single-day
+  swap, re-roll all unlocked days, lock a day, and a "Healthy: n/target" meter.
+- **Eat-out deals:** matches the weekday to the Sheet's Deals tab and shows a coral deal
+  pill on eat-out nights; degrades gracefully when the Deals tab doesn't exist yet.
+- **Shopping list:** deduped from the week's cook-at-home meals, grouped by aisle
+  (Produce · Meat & Seafood · Pantry · Dairy · Other), with "already have" checkboxes;
+  staples stay checked across plans.
+- **Data layer:** robust CSV parser + header-driven meal/deal model reading the published
+  Sheet via the gviz CSV endpoint.
+- **Persistence:** async key-value store over a swappable backend — localStorage by
+  default, **Firebase Realtime Database** (path-scoped under `dinner/home`, reusing the
+  health-tracker project) for live cross-device sync, with automatic localStorage fallback
+  when the Firebase SDK can't load (e.g. offline).
+- **UI/PWA:** Fresh Kitchen design system implemented in `index.html`, emoji-free
+  soft-duotone inline SVG icons, bottom tab bar (Plan · Shopping · Meals), empty/error
+  states, `prefers-reduced-motion` support, web manifest + service worker (installable,
+  offline shell).
+- **Tests:** dependency-free unit suite (33 tests) via Node's built-in `node:test` covering
+  the CSV parser, model, generator, store, deal matcher, shopping builder, and render helpers.
 - Project kickoff: vision, design system, roadmap, README, and this changelog.
 - Brainstormed and locked the product design — see [VISION.md](VISION.md).
 - Locked the visual direction: **Fresh Kitchen, modernized** (pine / mint / coral /
@@ -29,7 +61,10 @@ project aims to follow [Semantic Versioning](https://semver.org/).
   relaxes the lowest-priority rule when the meal list can't satisfy all four, and says so.
 - **Shopping list:** ingredients deduped and grouped by aisle; persistent staples stay
   checked week-to-week, perishables reset each new plan.
-- **Hosting:** single-file `index.html` on GitHub Pages, no build step.
+- **Hosting:** static files on GitHub Pages, no build step. (Implementation note: the
+  logic is split into small `src/*.js` ES modules — imported natively by `index.html` —
+  rather than one literal file, so the rule engine and helpers are unit-testable. Same
+  no-build / no-framework / static-hosting intent as the original "single-file" plan.)
 
 ---
 
