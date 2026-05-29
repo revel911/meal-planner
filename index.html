@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <meta name="theme-color" content="#1F6E54"/>
+  <link rel="manifest" href="manifest.webmanifest"/>
+  <title>Family Dinner Planner</title>
+  <style>
+    :root{
+      --pine:#1F6E54; --mint:#6FD3A6; --mint-bg:#E3F5EC; --paper:#FAF8F3; --surface:#FFFFFF;
+      --coral:#FF7A5C; --coral-bg:#FFE7DF; --ink:#1B2D26; --muted:#7C8B83;
+      --peach:#FCEBE2; --peach-tx:#C65A3A; --line:#EFE9DD;
+      --r-card:18px; --r-chip:14px; --shadow-rest:0 4px 14px rgba(27,45,38,.06);
+      --shadow-raise:0 14px 36px rgba(27,45,38,.16);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0}
+    body{
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      background:var(--paper); color:var(--ink);
+      padding-bottom:72px; /* room for fixed tab bar */
+    }
+    .wrap{max-width:840px; margin:0 auto; padding:16px}
+    .screen-title{font-size:1.5rem; font-weight:800; letter-spacing:-.01em; margin:8px 0 4px}
+    .sub{color:var(--muted); font-size:.8rem; font-weight:600; margin:0 0 16px}
+
+    /* tabs */
+    .tabbar{
+      position:fixed; left:0; right:0; bottom:0; display:flex; background:var(--surface);
+      border-top:1px solid var(--line); padding:6px 0 max(6px, env(safe-area-inset-bottom));
+      z-index:10;
+    }
+    .tab{flex:1; background:none; border:0; color:var(--muted); display:flex; flex-direction:column;
+      align-items:center; gap:2px; font-size:.62rem; font-weight:700; cursor:pointer; min-height:44px}
+    .tab[aria-selected="true"]{color:var(--pine)}
+    .tab svg{display:block}
+
+    /* day cards */
+    .cards{display:grid; gap:12px}
+    .card{
+      position:relative; background:var(--surface); border-radius:var(--r-card); padding:14px 14px 12px 18px;
+      box-shadow:var(--shadow-rest); overflow:hidden;
+    }
+    .card::before{content:""; position:absolute; left:0; top:0; bottom:0; width:5px}
+    .card.cook::before{background:var(--pine)}
+    .card.eatout::before{background:var(--coral)}
+    .card.is-locked{outline:2px solid var(--mint-bg)}
+    .day-label{margin:0 0 4px; font-size:.64rem; font-weight:800; letter-spacing:.12em; color:var(--muted)}
+    .meal-name{margin:0 0 10px; font-size:1rem; font-weight:700}
+    .pill-row{display:flex; flex-wrap:wrap; align-items:center; gap:6px}
+
+    /* pills */
+    .pill{display:inline-flex; align-items:center; gap:4px; border-radius:999px; padding:3px 9px;
+      font-size:.63rem; font-weight:700; line-height:1.4}
+    .pill svg{width:15px; height:15px}
+    .pill-cat{background:var(--peach); color:var(--peach-tx)}
+    .pill-healthy{background:var(--mint-bg); color:var(--pine)}
+    .pill-deal{background:var(--coral-bg); color:var(--coral)}
+    .pill-where{background:var(--mint-bg); color:var(--pine)}
+    .pill-staple{background:var(--mint-bg); color:var(--pine)}
+
+    /* buttons */
+    .btn-swap{margin-left:auto; width:30px; height:30px; border-radius:999px; background:var(--surface);
+      border:1px solid var(--line); color:var(--pine); display:grid; place-items:center; cursor:pointer}
+    .btn-swap svg{width:18px; height:18px}
+    .btn-lock{border:0; background:none; cursor:pointer; font-size:.8rem}
+    .btn-primary{background:var(--pine); color:#fff; border:0; border-radius:999px; padding:12px 20px;
+      font-weight:700; cursor:pointer; min-height:44px}
+    .btn-soft{background:var(--mint-bg); color:var(--pine); border:0; border-radius:999px; padding:10px 16px;
+      font-weight:700; cursor:pointer; min-height:44px}
+    .action-row{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:14px 0}
+
+    /* banners / states */
+    .banner{background:var(--mint-bg); color:var(--pine); border-radius:var(--r-chip); padding:10px 12px;
+      font-size:.78rem; font-weight:600; margin:0 0 12px}
+    .banner.warn{background:var(--coral-bg); color:var(--coral)}
+    .empty{color:var(--muted); text-align:center; padding:40px 16px; font-weight:600}
+    .healthy-meter{font-size:.78rem; font-weight:700; color:var(--pine)}
+
+    /* shopping */
+    .aisle-h{font-size:.7rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+      color:var(--muted); margin:16px 0 6px}
+    .shop-row{display:flex; align-items:center; gap:10px; background:var(--surface); border-radius:12px;
+      padding:10px 12px; margin-bottom:6px; box-shadow:var(--shadow-rest)}
+    .shop-row.is-checked .shop-name{text-decoration:line-through; color:var(--muted)}
+    .shop-name{font-weight:700; font-size:.9rem}
+    .shop-meals{margin-left:auto; color:var(--muted); font-size:.7rem; font-weight:600}
+    .meal-row{background:var(--surface); border-radius:var(--r-card); padding:12px 14px; margin-bottom:10px;
+      box-shadow:var(--shadow-rest)}
+    .meal-ings{color:var(--muted); font-size:.75rem; font-weight:600; margin:8px 0 0}
+
+    [hidden]{display:none !important}
+    @media (prefers-reduced-motion: no-preference){
+      .card{transition:transform .14s ease, opacity .14s ease}
+    }
+    @media (min-width:600px){ .cards{grid-template-columns:1fr 1fr} }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <!-- PLAN -->
+    <section id="screen-plan" class="screen">
+      <h1 class="screen-title">This Week</h1>
+      <p class="sub" id="plan-sub">Monday–Sunday dinners</p>
+      <div id="plan-banner"></div>
+      <div class="action-row">
+        <button class="btn-primary" id="btn-generate">Generate week</button>
+        <button class="btn-soft" id="btn-reroll" hidden>Re-roll unlocked</button>
+        <span class="healthy-meter" id="healthy-meter"></span>
+      </div>
+      <div class="cards" id="plan-cards"></div>
+    </section>
+
+    <!-- SHOPPING -->
+    <section id="screen-shopping" class="screen" hidden>
+      <h1 class="screen-title">Shopping</h1>
+      <p class="sub">From this week's cook-at-home meals</p>
+      <div id="shopping-list"></div>
+    </section>
+
+    <!-- MEALS -->
+    <section id="screen-meals" class="screen" hidden>
+      <h1 class="screen-title">Meals</h1>
+      <p class="sub">From the shared Google Sheet (read-only)</p>
+      <div id="meals-list"></div>
+    </section>
+  </main>
+
+  <nav class="tabbar" role="tablist" aria-label="Sections">
+    <button class="tab" id="tab-plan" role="tab" aria-selected="true" data-screen="plan"></button>
+    <button class="tab" id="tab-shopping" role="tab" aria-selected="false" data-screen="shopping"></button>
+    <button class="tab" id="tab-meals" role="tab" aria-selected="false" data-screen="meals"></button>
+  </nav>
+
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
