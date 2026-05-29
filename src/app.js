@@ -11,12 +11,18 @@ const state = { meals: [], deals: [], plan: null, error: null };
 
 let backend = localStorageBackend;
 if (FIREBASE_CONFIG && FIREBASE_CONFIG.databaseURL) {
-  const { firebaseBackend } = await import('./firebase.js');
-  backend = firebaseBackend(FIREBASE_CONFIG, FIREBASE_SCOPE);
-  // Live plan sync from the other phone.
-  backend.subscribe?.('mp:plan', (_k, plan) => {
-    if (plan) { state.plan = plan; renderPlan(); }
-  });
+  try {
+    const { firebaseBackend } = await import('./firebase.js');
+    backend = firebaseBackend(FIREBASE_CONFIG, FIREBASE_SCOPE);
+    // Live plan sync from the other phone.
+    backend.subscribe?.('mp:plan', (_k, plan) => {
+      if (plan) { state.plan = plan; renderPlan(); }
+    });
+  } catch (err) {
+    // Offline or CDN unreachable: fall back to local storage so the app still works.
+    console.warn('Firebase unavailable, using local storage only:', err);
+    backend = localStorageBackend;
+  }
 }
 const store = createStore(backend);
 
