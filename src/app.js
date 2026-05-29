@@ -105,12 +105,13 @@ async function savePlan() {
 }
 
 async function onGenerate() {
-  const lastWeek = await store.getLastWeek();
-  // Save the *previous* plan's meals as "last week" so the next gen avoids them.
-  if (state.plan && state.plan.days.length) {
-    await store.setLastWeek(state.plan.days.map((d) => d.meal.meal));
-  }
-  state.plan = generateWeek(state.meals, lastWeek);
+  // Avoid the meals that are on screen right now (the week we're replacing). On the
+  // very first generate there is no current plan, so fall back to stored history.
+  const avoid = (state.plan && state.plan.days.length)
+    ? state.plan.days.map((d) => d.meal.meal)
+    : await store.getLastWeek();
+  state.plan = generateWeek(state.meals, avoid);
+  await store.setLastWeek(avoid);
   await savePlan();
   renderPlan();
 }
