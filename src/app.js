@@ -5,10 +5,20 @@ import { generateWeek, rerollDay, regenerateUnlocked, countHealthy } from './gen
 import { dealForDay } from './deals.js';
 import { buildShoppingList } from './shopping.js';
 import { dayCardHTML, shoppingRowHTML, mealRowHTML, evaluateOverride } from './render.js';
-import { RULE_DEFAULTS } from './config.js';
+import { RULE_DEFAULTS, FIREBASE_CONFIG, FIREBASE_SCOPE } from './config.js';
 
-const store = createStore(localStorageBackend);
 const state = { meals: [], deals: [], plan: null, error: null };
+
+let backend = localStorageBackend;
+if (FIREBASE_CONFIG && FIREBASE_CONFIG.databaseURL) {
+  const { firebaseBackend } = await import('./firebase.js');
+  backend = firebaseBackend(FIREBASE_CONFIG, FIREBASE_SCOPE);
+  // Live plan sync from the other phone.
+  backend.subscribe?.('mp:plan', (_k, plan) => {
+    if (plan) { state.plan = plan; renderPlan(); }
+  });
+}
+const store = createStore(backend);
 
 const $ = (sel) => document.querySelector(sel);
 
