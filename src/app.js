@@ -4,7 +4,7 @@ import { createStore, localStorageBackend } from './store.js';
 import { generateWeek, rerollDay, regenerateUnlocked, countHealthy } from './generator.js';
 import { dealForDay } from './deals.js';
 import { buildShoppingList } from './shopping.js';
-import { dayCardHTML, shoppingRowHTML, mealRowHTML } from './render.js';
+import { dayCardHTML, shoppingRowHTML, mealRowHTML, evaluateOverride } from './render.js';
 import { RULE_DEFAULTS } from './config.js';
 
 const store = createStore(localStorageBackend);
@@ -55,7 +55,7 @@ function renderPlan() {
     return;
   }
   cards.innerHTML = state.plan.days.map((d, i) =>
-    dayCardHTML(d, i, d.mode === 'eatout' ? dealForDay(state.deals, d.day) : null)).join('');
+    dayCardHTML(d, i, d.mode === 'eatout' ? dealForDay(state.deals, d.day) : null, state.meals)).join('');
   $('#btn-reroll').hidden = false;
   const target = RULE_DEFAULTS.healthyTarget;
   $('#healthy-meter').textContent = `Healthy: ${countHealthy(state.plan)}/${target}`;
@@ -130,6 +130,22 @@ function wireEvents() {
     state.plan = regenerateUnlocked(state.plan, state.meals); savePlan(); renderPlan();
   });
   $('#plan-cards').addEventListener('click', onCardClick);
+  $('#plan-cards').addEventListener('change', (e) => {
+    const sel = e.target.closest('[data-action="override"]');
+    if (!sel) return;
+    const i = Number(sel.dataset.day);
+    const meal = state.meals.find((m) => m.meal === sel.value);
+    if (!meal) return;
+    const warn = evaluateOverride(state.plan, i, meal);
+    state.plan.days[i] = { ...state.plan.days[i], meal, mode: meal.where === 'Eat Out' ? 'eatout' : 'cook' };
+    state.plan.healthyCount = countHealthy(state.plan);
+    savePlan();
+    renderPlan();
+    if (warn) {
+      const slot = document.querySelector(`[data-warn="${i}"]`);
+      if (slot) slot.textContent = warn;
+    }
+  });
   $('#shopping-list').addEventListener('change', onCheck);
 }
 

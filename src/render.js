@@ -1,4 +1,5 @@
 import { ICONS } from './icons.js';
+import { RULE_DEFAULTS } from './config.js';
 
 const esc = (s) => String(s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -14,7 +15,7 @@ function dealPill(deal) {
 }
 
 // dayIndex is needed so event handlers in app.js can map clicks back to a day.
-export function dayCardHTML(day, dayIndex, deal) {
+export function dayCardHTML(day, dayIndex, deal, meals = []) {
   const isEat = day.mode === 'eatout';
   const label = `${day.day.toUpperCase()}${isEat ? ' · EAT OUT' : ''}`;
   const pills = [
@@ -31,6 +32,10 @@ export function dayCardHTML(day, dayIndex, deal) {
         ${pills}
         <button class="btn-swap" data-action="swap" data-day="${dayIndex}" aria-label="Swap ${esc(day.meal.meal)}">${ICONS.refresh}</button>
         <button class="btn-lock" data-action="lock" data-day="${dayIndex}" aria-label="Lock this day" aria-pressed="${day.locked}">${day.locked ? '🔒' : ''}</button>
+      </div>
+      <div class="override">
+        ${daySelectHTML(day, dayIndex, meals)}
+        <p class="override-warn" data-warn="${dayIndex}"></p>
       </div>
     </article>`;
 }
@@ -56,4 +61,25 @@ export function mealRowHTML(meal) {
       </div>
       <p class="meal-ings">${esc(meal.ingredients.join(', '))}</p>
     </article>`;
+}
+
+// Inline warning string (empty = no warning) for replacing day `dayIndex` with `meal`.
+export function evaluateOverride(plan, dayIndex, meal) {
+  if (plan.days.some((d) => d.meal.category === meal.category)) {
+    return `Heads up: ${meal.category} is already used this week (duplicate category).`;
+  }
+  if (meal.where === 'Eat Out') {
+    const others = plan.days.filter((_, i) => i !== dayIndex);
+    const eatOut = others.filter((d) => d.mode === 'eatout').length;
+    if (eatOut + 1 > RULE_DEFAULTS.maxEatOut) {
+      return `Heads up: that's more than ${RULE_DEFAULTS.maxEatOut} eat-out nights.`;
+    }
+  }
+  return '';
+}
+
+export function daySelectHTML(day, dayIndex, meals) {
+  const opts = meals.map((m) =>
+    `<option value="${esc(m.meal)}"${m.meal === day.meal.meal ? ' selected' : ''}>${esc(m.meal)} (${esc(m.category)})</option>`).join('');
+  return `<select class="day-select" data-action="override" data-day="${dayIndex}" aria-label="Choose meal for ${esc(day.day)}">${opts}</select>`;
 }
