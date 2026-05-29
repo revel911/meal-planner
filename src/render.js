@@ -31,7 +31,7 @@ export function dayCardHTML(day, dayIndex, deal, meals = []) {
       <div class="pill-row">
         ${pills}
         <button class="btn-swap" data-action="swap" data-day="${dayIndex}" aria-label="Swap ${esc(day.meal.meal)}">${ICONS.refresh}</button>
-        <button class="btn-lock" data-action="lock" data-day="${dayIndex}" aria-label="Lock this day" aria-pressed="${day.locked}">${day.locked ? '🔒' : ''}</button>
+        <button class="btn-lock${day.locked ? ' is-on' : ''}" data-action="lock" data-day="${dayIndex}" aria-label="Lock this day" aria-pressed="${day.locked}">${ICONS.lock}</button>
       </div>
       <div class="override">
         ${daySelectHTML(day, dayIndex, meals)}

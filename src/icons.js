@@ -26,4 +26,8 @@ export const ICONS = {
     <path class="fill" d="M4 4h7l9 9-7 7-9-9V4Z" fill="currentColor" opacity=".18"/>
     <path class="stroke" d="M4 4h7l9 9-7 7-9-9V4Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
     <circle class="stroke" cx="8" cy="8" r="1.3" fill="none" stroke="currentColor" stroke-width="1.9"/>`),
+  lock: svg(`
+    <rect class="fill" x="5" y="11" width="14" height="9" rx="2" fill="currentColor" opacity=".18"/>
+    <rect class="stroke" x="5" y="11" width="14" height="9" rx="2" fill="none" stroke="currentColor" stroke-width="1.9"/>
+    <path class="stroke" d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>`),
 };

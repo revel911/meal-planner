@@ -64,7 +64,9 @@
     .btn-swap{margin-left:auto; width:30px; height:30px; border-radius:999px; background:var(--surface);
       border:1px solid var(--line); color:var(--pine); display:grid; place-items:center; cursor:pointer}
     .btn-swap svg{width:18px; height:18px}
-    .btn-lock{border:0; background:none; cursor:pointer; font-size:.8rem}
+    .btn-lock{border:0; background:none; cursor:pointer; color:var(--muted)}
+    .btn-lock.is-on{color:var(--pine)}
+    .btn-lock svg{width:18px; height:18px}
     .btn-primary{background:var(--pine); color:#fff; border:0; border-radius:999px; padding:12px 20px;
       font-weight:700; cursor:pointer; min-height:44px}
     .btn-soft{background:var(--mint-bg); color:var(--pine); border:0; border-radius:999px; padding:10px 16px;
@@ -139,5 +141,10 @@
   </nav>
 
   <script type="module" src="src/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+    }
+  </script>
 </body>
 </html>
