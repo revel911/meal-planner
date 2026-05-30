@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { ICONS } from '../src/icons.js';
-import { dayCardHTML, shoppingRowHTML, mealRowHTML, evaluateOverride } from '../src/render.js';
+import { dayCardHTML, shoppingRowHTML, mealRowHTML, evaluateOverride, pickerSheetHTML } from '../src/render.js';
 
 const COOK_DAY = { day: 'Monday', mode: 'cook', locked: false,
   meal: { meal: 'Spaghetti', category: 'Italian', healthy: true } };
@@ -68,4 +68,33 @@ test('evaluateOverride flags a duplicate category and eat-out overflow', () => {
   assert.equal(evaluateOverride(plan, 0, { meal: 'F', category: 'Greek', where: 'Home' }), '');
   // Replacing Monday's Italian with a different Italian is NOT a duplicate (same slot).
   assert.equal(evaluateOverride(plan, 0, { meal: 'G', category: 'Italian', where: 'Home' }), '');
+});
+
+test('dayCardHTML has Change footer with shuffle + list, and no dropdown or lock', () => {
+  const html = dayCardHTML(COOK_DAY, 0, null);
+  assert.match(html, /data-action="swap"/);
+  assert.match(html, /data-action="pick"/);
+  assert.doesNotMatch(html, /data-action="lock"/);
+  assert.doesNotMatch(html, /<select/);
+});
+
+test('mealRowHTML renders thumb up/down reflecting current rating', () => {
+  const up = mealRowHTML({ meal: 'Tacos', category: 'Mexican', where: 'Either', healthy: false, ingredients: ['pork'] }, 'up');
+  assert.match(up, /data-action="rate"/);
+  assert.match(up, /data-meal="Tacos"/);
+  assert.match(up, /data-rate="up"[^>]*aria-pressed="true"/);
+  const none = mealRowHTML({ meal: 'Tacos', category: 'Mexican', where: 'Either', healthy: false, ingredients: ['pork'] });
+  assert.match(none, /data-rate="up"[^>]*aria-pressed="false"/);
+});
+
+test('pickerSheetHTML lists every meal as a pick option for the given day', () => {
+  const meals = [
+    { meal: 'Tacos', category: 'Mexican' },
+    { meal: 'Sushi', category: 'Japanese' },
+  ];
+  const html = pickerSheetHTML(2, meals);
+  assert.match(html, /data-action="pick-meal"/);
+  assert.match(html, /data-day="2"/);
+  assert.match(html, /Tacos/);
+  assert.match(html, /Sushi/);
 });
