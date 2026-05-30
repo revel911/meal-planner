@@ -9,7 +9,7 @@ const EATOUT_DAY = { day: 'Tuesday', mode: 'eatout', locked: false,
   meal: { meal: 'Sushi', category: 'Japanese', healthy: false } };
 
 test('every core icon exists and is an svg using currentColor', () => {
-  for (const name of ['calendar', 'bag', 'utensils', 'refresh', 'leaf', 'tag', 'pot', 'star', 'lock']) {
+  for (const name of ['calendar', 'bag', 'utensils', 'refresh', 'leaf', 'tag', 'home', 'list', 'thumbUp', 'thumbDown']) {
     assert.ok(ICONS[name], `missing icon: ${name}`);
     assert.match(ICONS[name], /^<svg[\s\S]*<\/svg>$/);
     assert.match(ICONS[name], /currentColor/);
