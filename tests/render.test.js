@@ -22,6 +22,7 @@ test('dayCardHTML renders meal, category pill and day label', () => {
   assert.match(html, /Italian/);
   assert.match(html, /MONDAY/);
   assert.match(html, /class="card cook"/);
+  assert.match(html, /badge-cook/);
 });
 
 test('dayCardHTML marks eat-out and renders a deal pill when given a deal', () => {
@@ -29,6 +30,7 @@ test('dayCardHTML marks eat-out and renders a deal pill when given a deal', () =
   assert.match(html, /class="card eatout"/);
   assert.match(html, /EAT OUT/);
   assert.match(html, /Taco Tuesday/);
+  assert.match(html, /badge-eatout/);
 });
 
 test('dayCardHTML shows a healthy pill only for healthy meals', () => {

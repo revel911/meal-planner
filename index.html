@@ -58,38 +58,44 @@
     /* day cards */
     .cards{display:grid; gap:12px}
     .card{
-      position:relative; background:var(--surface); border-radius:var(--r-card); padding:14px 14px 12px 18px;
-      box-shadow:var(--shadow-rest); overflow:hidden;
+      position:relative; background:var(--surface); border:1px solid var(--surface-line);
+      border-radius:var(--r-card); padding:14px 14px 12px 14px; overflow:hidden;
     }
-    .card::before{content:""; position:absolute; left:0; top:0; bottom:0; width:5px}
-    .card.cook::before{background:var(--pine)}
-    .card.eatout::before{background:var(--coral)}
-    .card.is-locked{outline:2px solid var(--mint-bg)}
-    .day-label{margin:0 0 4px; font-size:.64rem; font-weight:800; letter-spacing:.12em; color:var(--muted)}
-    .meal-name{margin:0 0 10px; font-size:1rem; font-weight:700}
+    .card.eatout{background:var(--gold-soft); border-color:rgba(198,161,76,.3)}
+    .card.is-locked{border-color:var(--gold); box-shadow:0 0 0 1px var(--gold) inset}
+    .badge{position:absolute; top:14px; left:14px; width:34px; height:34px; border-radius:9px;
+      display:grid; place-items:center}
+    .badge svg{width:20px; height:20px}
+    .badge-cook{border:1.5px solid rgba(198,161,76,.55); color:var(--gold)}
+    .badge-eatout{background:linear-gradient(135deg,var(--gold),var(--gold-2)); color:var(--ink-on-gold)}
+    .day-label{margin:0 0 4px 46px; font-size:.56rem; font-weight:600; letter-spacing:.14em;
+      text-transform:uppercase; color:var(--cream-muted)}
+    .card.eatout .day-label{color:var(--gold-hi)}
+    .meal-name{margin:0 0 10px 46px; font-family:var(--serif); font-size:1rem; font-weight:700; color:var(--cream)}
     .pill-row{display:flex; flex-wrap:wrap; align-items:center; gap:6px}
 
     /* pills */
     .pill{display:inline-flex; align-items:center; gap:4px; border-radius:999px; padding:3px 9px;
-      font-size:.63rem; font-weight:700; line-height:1.4}
-    .pill svg{width:15px; height:15px}
-    .pill-cat{background:var(--peach); color:var(--peach-tx)}
-    .pill-healthy{background:var(--mint-bg); color:var(--pine)}
-    .pill-deal{background:var(--coral-bg); color:var(--coral)}
-    .pill-where{background:var(--mint-bg); color:var(--pine)}
-    .pill-staple{background:var(--mint-bg); color:var(--pine)}
+      font-size:.6rem; font-weight:600; line-height:1.4}
+    .pill svg{width:14px; height:14px}
+    .pill-cat{background:var(--surface); color:var(--cream)}
+    .pill-healthy{background:var(--sage-leaf-bg); color:var(--sage-leaf)}
+    .pill-deal{background:var(--gold-soft); color:var(--gold-hi)}
+    .pill-where{background:var(--surface); color:var(--cream)}
+    .pill-staple{background:var(--gold-soft); color:var(--gold-hi)}
 
     /* buttons */
-    .btn-swap{margin-left:auto; width:30px; height:30px; border-radius:999px; background:var(--surface);
-      border:1px solid var(--line); color:var(--pine); display:grid; place-items:center; cursor:pointer}
-    .btn-swap svg{width:18px; height:18px}
-    .btn-lock{border:0; background:none; cursor:pointer; color:var(--muted)}
-    .btn-lock.is-on{color:var(--pine)}
+    .btn-swap{margin-left:auto; width:30px; height:30px; border-radius:999px; background:transparent;
+      border:1.5px solid rgba(198,161,76,.45); color:var(--gold); display:grid; place-items:center; cursor:pointer}
+    .btn-swap svg{width:16px; height:16px}
+    .btn-lock{border:0; background:none; cursor:pointer; color:var(--cream-muted)}
+    .btn-lock.is-on{color:var(--gold)}
     .btn-lock svg{width:18px; height:18px}
-    .btn-primary{background:var(--pine); color:#fff; border:0; border-radius:999px; padding:12px 20px;
-      font-weight:700; cursor:pointer; min-height:44px}
-    .btn-soft{background:var(--mint-bg); color:var(--pine); border:0; border-radius:999px; padding:10px 16px;
-      font-weight:700; cursor:pointer; min-height:44px}
+    .btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold-2)); color:var(--ink-on-gold);
+      border:0; border-radius:999px; padding:12px 22px; font-weight:700; letter-spacing:.04em; cursor:pointer;
+      min-height:44px; box-shadow:0 8px 20px rgba(181,140,56,.3)}
+    .btn-soft{background:transparent; color:var(--gold-hi); border:1.5px solid rgba(198,161,76,.45);
+      border-radius:999px; padding:10px 16px; font-weight:700; cursor:pointer; min-height:44px}
     .action-row{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:14px 0}
 
     /* banners / states */

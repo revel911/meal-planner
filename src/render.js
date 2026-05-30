@@ -24,8 +24,12 @@ export function dayCardHTML(day, dayIndex, deal, meals = []) {
     (isEat && deal) ? dealPill(deal) : '',
   ].join('');
   const lockCls = day.locked ? ' is-locked' : '';
+  const badge = isEat
+    ? `<span class="badge badge-eatout" aria-hidden="true">${ICONS.star}</span>`
+    : `<span class="badge badge-cook" aria-hidden="true">${ICONS.pot}</span>`;
   return `
     <article class="card ${isEat ? 'eatout' : 'cook'}${lockCls}" data-day="${dayIndex}">
+      ${badge}
       <p class="day-label">${esc(label)}</p>
       <h3 class="meal-name">${esc(day.meal.meal)}</h3>
       <div class="pill-row">
