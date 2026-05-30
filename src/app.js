@@ -1,7 +1,7 @@
 import { ICONS } from './icons.js';
 import { fetchMeals, fetchDeals } from './sheet.js';
 import { createStore, localStorageBackend } from './store.js';
-import { generateWeek, rerollDay, regenerateUnlocked, countHealthy } from './generator.js';
+import { generateWeek, rerollDay, countHealthy } from './generator.js';
 import { dealForDay } from './deals.js';
 import { buildShoppingList } from './shopping.js';
 import { dayCardHTML, shoppingRowHTML, mealRowHTML, evaluateOverride, pickerSheetHTML } from './render.js';
