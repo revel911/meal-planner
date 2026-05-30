@@ -4,10 +4,11 @@ export function countHealthy(plan) {
   return plan.days.filter((d) => d.meal.healthy).length;
 }
 
-const RATING_WEIGHT = { up: 2.5, down: 0.25 };
-// History is most-recent-first. Index 0 (the most recent week) is excluded by the
-// pool filter, so it carries no extra penalty here; older weeks fade back in.
-const RECENCY_WEIGHT = [1, 0.25, 0.5];
+const RATING_WEIGHT = { up: 2.5, down: 0.25 }; // ~10x spread; neutral/absent = 1
+// Soft de-prioritize meals from 2-3 weeks ago. History is most-recent-first;
+// index 0 (the most recent week) is excluded by the pool filter, never weighted,
+// so this table is indexed by weeks-ago starting at 1 (index 0 is a placeholder).
+const RECENCY_WEIGHT = [/* unused */ 1, 0.25, 0.5];
 
 export function ratingWeight(mealName, ratings = {}) {
   return RATING_WEIGHT[(ratings || {})[mealName]] ?? 1;
@@ -26,7 +27,7 @@ export function recencyWeight(mealName, history = []) {
 function weightedShuffle(arr, rng = Math.random, weightOf = () => 1) {
   return arr
     .map((item) => {
-      const w = Math.max(weightOf(item), 1e-9);
+      const w = Math.max(weightOf(item) || 1e-9, 1e-9); // || guards NaN/0/undefined
       return { item, key: Math.pow(rng(), 1 / w) };
     })
     .sort((a, b) => b.key - a.key)
