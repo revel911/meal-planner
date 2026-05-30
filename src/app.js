@@ -1,13 +1,13 @@
 import { ICONS } from './icons.js';
 import { fetchMeals, fetchDeals } from './sheet.js';
 import { createStore, localStorageBackend } from './store.js';
-import { generateWeek, rerollDay, regenerateUnlocked, countHealthy } from './generator.js';
+import { generateWeek, rerollDay, countHealthy } from './generator.js';
 import { dealForDay } from './deals.js';
 import { buildShoppingList } from './shopping.js';
-import { dayCardHTML, shoppingRowHTML, mealRowHTML, evaluateOverride } from './render.js';
+import { dayCardHTML, shoppingRowHTML, mealRowHTML, evaluateOverride, pickerSheetHTML } from './render.js';
 import { RULE_DEFAULTS, FIREBASE_CONFIG, FIREBASE_SCOPE } from './config.js';
 
-const state = { meals: [], deals: [], plan: null, error: null };
+const state = { meals: [], deals: [], plan: null, ratings: {}, history: [], error: null };
 
 let backend = localStorageBackend;
 if (FIREBASE_CONFIG && FIREBASE_CONFIG.databaseURL) {
@@ -71,7 +71,7 @@ function renderPlan() {
     return;
   }
   cards.innerHTML = state.plan.days.map((d, i) =>
-    dayCardHTML(d, i, d.mode === 'eatout' ? dealForDay(state.deals, d.day) : null, state.meals)).join('');
+    dayCardHTML(d, i, d.mode === 'eatout' ? dealForDay(state.deals, d.day) : null)).join('');
   $('#btn-reroll').hidden = false;
   const target = RULE_DEFAULTS.healthyTarget;
   $('#healthy-meter').textContent = `Healthy: ${countHealthy(state.plan)}/${target}`;
@@ -96,7 +96,7 @@ function renderShopping() {
 function renderMeals() {
   const el = $('#meals-list');
   el.innerHTML = state.meals.length
-    ? state.meals.map(mealRowHTML).join('')
+    ? state.meals.map((m) => mealRowHTML(m, state.ratings[m.meal])).join('')
     : `<p class="empty">No meals loaded.</p>`;
 }
 
@@ -105,13 +105,14 @@ async function savePlan() {
 }
 
 async function onGenerate() {
-  // Avoid the meals that are on screen right now (the week we're replacing). On the
-  // very first generate there is no current plan, so fall back to stored history.
-  const avoid = (state.plan && state.plan.days.length)
+  // Avoid the week currently on screen (treat it as the most-recent history entry)
+  // plus the stored older weeks; bias by ratings.
+  const current = (state.plan && state.plan.days.length)
     ? state.plan.days.map((d) => d.meal.meal)
-    : await store.getLastWeek();
-  state.plan = generateWeek(state.meals, avoid);
-  await store.setLastWeek(avoid);
+    : null;
+  const historyForGen = current ? [current, ...state.history] : state.history;
+  state.plan = generateWeek(state.meals, historyForGen, { ratings: state.ratings });
+  if (current) state.history = await store.pushHistory(current);
   await savePlan();
   renderPlan();
 }
@@ -122,11 +123,41 @@ function onCardClick(e) {
   const i = Number(btn.dataset.day);
   const action = btn.dataset.action;
   if (action === 'swap') {
-    state.plan = rerollDay(state.plan, i, state.meals);
-  } else if (action === 'lock') {
-    state.plan.days[i].locked = !state.plan.days[i].locked;
+    state.plan = rerollDay(state.plan, i, state.meals, { history: state.history, ratings: state.ratings });
+    savePlan(); renderPlan();
+  } else if (action === 'pick') {
+    openPicker(i);
   }
-  savePlan(); renderPlan();
+}
+
+function openPicker(dayIndex) {
+  const host = $('#picker-host');
+  host.innerHTML = pickerSheetHTML(dayIndex, state.meals);
+  host.hidden = false;
+}
+
+function closePicker() {
+  const host = $('#picker-host');
+  host.hidden = true;
+  host.innerHTML = '';
+}
+
+function applyPick(dayIndex, mealName) {
+  const meal = state.meals.find((m) => m.meal === mealName);
+  if (!meal) return;
+  const warn = evaluateOverride(state.plan, dayIndex, meal);
+  state.plan.days[dayIndex] = {
+    ...state.plan.days[dayIndex], meal,
+    mode: meal.where === 'Eat Out' ? 'eatout' : 'cook',
+  };
+  state.plan.healthyCount = countHealthy(state.plan);
+  closePicker();
+  savePlan();
+  renderPlan();
+  if (warn) {
+    const slot = document.querySelector(`[data-warn="${dayIndex}"]`);
+    if (slot) slot.textContent = warn;
+  }
 }
 
 async function onCheck(e) {
@@ -144,26 +175,30 @@ function wireEvents() {
     t.addEventListener('click', () => showScreen(t.dataset.screen)));
   $('#btn-generate').addEventListener('click', onGenerate);
   $('#btn-reroll').addEventListener('click', () => {
-    state.plan = regenerateUnlocked(state.plan, state.meals); savePlan(); renderPlan();
+    const current = state.plan.days.map((d) => d.meal.meal);
+    state.plan = generateWeek(state.meals, [current, ...state.history], { ratings: state.ratings });
+    savePlan(); renderPlan();
   });
   $('#plan-cards').addEventListener('click', onCardClick);
-  $('#plan-cards').addEventListener('change', (e) => {
-    const sel = e.target.closest('[data-action="override"]');
-    if (!sel) return;
-    const i = Number(sel.dataset.day);
-    const meal = state.meals.find((m) => m.meal === sel.value);
-    if (!meal) return;
-    const warn = evaluateOverride(state.plan, i, meal);
-    state.plan.days[i] = { ...state.plan.days[i], meal, mode: meal.where === 'Eat Out' ? 'eatout' : 'cook' };
-    state.plan.healthyCount = countHealthy(state.plan);
-    savePlan();
-    renderPlan();
-    if (warn) {
-      const slot = document.querySelector(`[data-warn="${i}"]`);
-      if (slot) slot.textContent = warn;
-    }
+  $('#picker-host').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    if (btn.dataset.action === 'pick-meal') applyPick(Number(btn.dataset.day), btn.dataset.meal);
+    else if (btn.dataset.action === 'picker-close') closePicker();
+  });
+  $('#meals-list').addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-action="rate"]');
+    if (!btn) return;
+    const meal = btn.dataset.meal;
+    const dir = btn.dataset.rate;
+    const next = state.ratings[meal] === dir ? 'neutral' : dir; // tap active to clear
+    state.ratings = await store.setRating(meal, next);
+    renderMeals();
   });
   $('#shopping-list').addEventListener('change', onCheck);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !$('#picker-host').hidden) closePicker();
+  });
 }
 
 async function init() {
@@ -175,6 +210,7 @@ async function init() {
     state.error = 'Could not reach the Google Sheet. Showing the last saved plan if available.';
   }
   state.plan = await store.getPlan();
+  [state.ratings, state.history] = await Promise.all([store.getRatings(), store.getHistory()]);
   renderPlan();
 }
 

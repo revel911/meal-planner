@@ -16,6 +16,17 @@ export const ICONS = {
     <path class="fill" d="M16 3.5c2 1.5 2 5 0 6.5Z" fill="currentColor" opacity=".16"/>
     <path class="stroke" d="M8 3.5v6m-2-6v4m4-4v4m-2 2v9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     <path class="stroke" d="M16 3.5c2 1.5 2 5 0 6.5v9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`),
+  home: svg(`
+    <path class="fill" d="M5 10.5 12 5l7 5.5V19a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-8.5Z" fill="currentColor" opacity=".16"/>
+    <path class="stroke" d="M4 10.5 12 4l8 6.5M6 10v9h12v-9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`),
+  list: svg(`
+    <path class="stroke" d="M8 6h11M8 12h11M8 18h11M4 6h.01M4 12h.01M4 18h.01" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>`),
+  thumbUp: svg(`
+    <path class="fill" d="M7 10h2v9H7zM9 10l3.5-6c1.4 0 2.2 1 1.9 2.3L13.8 9H19c1 0 1.7 1 1.4 2l-1.6 6c-.2.8-.9 1.3-1.7 1.3H9V10Z" fill="currentColor" opacity=".16"/>
+    <path class="stroke" d="M7 10v9M9 10l3.5-6c1.4 0 2.2 1 1.9 2.3L13.8 9H19c1 0 1.7 1 1.4 2l-1.6 6c-.2.8-.9 1.3-1.7 1.3H7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`),
+  thumbDown: svg(`
+    <path class="fill" d="M17 14h-2V5h2zM15 14l-3.5 6c-1.4 0-2.2-1-1.9-2.3L10.2 15H5c-1 0-1.7-1-1.4-2l1.6-6C5.4 6.2 6.1 5.7 6.9 5.7H15V14Z" fill="currentColor" opacity=".16"/>
+    <path class="stroke" d="M17 14V5M15 14l-3.5 6c-1.4 0-2.2-1-1.9-2.3L10.2 15H5c-1 0-1.7-1-1.4-2l1.6-6C5.4 6.2 6.1 5.7 6.9 5.7H17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`),
   refresh: svg(`
     <circle class="fill" cx="12" cy="12" r="8" fill="currentColor" opacity=".16"/>
     <path class="stroke" d="M19.5 9A8 8 0 1 0 20 14M20 4.5V9h-4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`),

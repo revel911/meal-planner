@@ -4,14 +4,40 @@ export function countHealthy(plan) {
   return plan.days.filter((d) => d.meal.healthy).length;
 }
 
-// Fisher-Yates using an injectable rng (defaults to Math.random).
-function shuffled(arr, rng = Math.random) {
-  const a = arr.slice();
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+const RATING_WEIGHT = { up: 2.5, down: 0.25 }; // ~10x spread; neutral/absent = 1
+// Soft de-prioritize meals from 2-3 weeks ago. History is most-recent-first;
+// index 0 (the most recent week) is excluded by the pool filter, never weighted,
+// so this table is indexed by weeks-ago starting at 1 (index 0 is a placeholder).
+// Index 3 (4 weeks ago, possible since the generate path prepends the current week
+// onto up-to-3 stored weeks) is full weight 1 = neutral, i.e. fully faded back in.
+const RECENCY_WEIGHT = [/* unused */ 1, 0.25, 0.5, 1];
+
+export function ratingWeight(mealName, ratings = {}) {
+  return RATING_WEIGHT[(ratings || {})[mealName]] ?? 1;
+}
+
+export function recencyWeight(mealName, history = []) {
+  for (let w = 1; w < history.length; w++) {
+    if (history[w].includes(mealName)) return RECENCY_WEIGHT[w] ?? 1;
   }
-  return a;
+  return 1;
+}
+
+// Efraimidis-Spirakis weighted shuffle: key = u^(1/weight); larger key sorts first,
+// so higher-weight items tend to land earlier. With rng()===0 every key is 0 and the
+// (stable) sort preserves input order, keeping the existing deterministic tests valid.
+function weightedShuffle(arr, rng = Math.random, weightOf = () => 1) {
+  return arr
+    .map((item) => {
+      const w = Math.max(weightOf(item) || 1e-9, 1e-9); // || guards NaN/0/undefined
+      return { item, key: Math.pow(rng(), 1 / w) };
+    })
+    .sort((a, b) => b.key - a.key)
+    .map((x) => x.item);
+}
+
+function weightFn(history, ratings) {
+  return (m) => recencyWeight(m.meal, history) * ratingWeight(m.meal, ratings);
 }
 
 function modeFor(meal) {
@@ -19,10 +45,12 @@ function modeFor(meal) {
 }
 
 // Try to pick `need` distinct meals from `pool` satisfying the active rules.
-// `relaxed` is a Set of tokens currently switched off. Returns Meal[] or null.
-function select(pool, need, cfg, relaxed, rng, fixed = []) {
-  // Healthy-first ordering biases greedy solutions toward the target.
-  const order = shuffled(pool, rng).sort((a, b) => Number(b.healthy) - Number(a.healthy));
+// `relaxed` is a Set of tokens currently switched off. `weightOf` biases pick order.
+// Returns Meal[] or null.
+function select(pool, need, cfg, relaxed, rng, fixed = [], weightOf = () => 1) {
+  // Weighted ordering biases greedy solutions toward liked/less-recent meals;
+  // the healthy target is still enforced below by backtracking.
+  const order = weightedShuffle(pool, rng, weightOf);
   const chosen = [...fixed];
   const usedCats = new Set(fixed.map((m) => m.category));
   const usedNames = new Set(fixed.map((m) => m.meal));
@@ -67,17 +95,20 @@ const LADDER = [
   ['healthy', 'category', 'eatout', 'repeat'],
 ];
 
-export function generateWeek(meals, lastWeek = [], opts = {}) {
+// `history` is most-recent-first string[][]; opts.ratings is { mealName -> 'up'|'down' }.
+export function generateWeek(meals, history = [], opts = {}) {
   const cfg = { ...RULE_DEFAULTS, ...opts };
   const rng = opts.rng || Math.random;
+  const recentWeek = history[0] || [];
+  const weightOf = weightFn(history, opts.ratings);
 
   for (const relaxedList of LADDER) {
     const relaxed = new Set(relaxedList);
     const pool = relaxed.has('repeat')
       ? meals.slice()
-      : meals.filter((m) => !lastWeek.includes(m.meal));
+      : meals.filter((m) => !recentWeek.includes(m.meal));
     if (pool.length < 7) continue; // not enough eligible meals at this relaxation level
-    const picks = select(pool, 7, cfg, relaxed, rng);
+    const picks = select(pool, 7, cfg, relaxed, rng, [], weightOf);
     if (picks) {
       const days = picks.map((m, i) => ({
         day: DAYS[i], meal: m, mode: modeFor(m), locked: false,
@@ -100,7 +131,8 @@ export function rerollDay(plan, dayIndex, meals, opts = {}) {
   const otherCats = plan.days.filter((_, i) => i !== dayIndex).map((d) => d.meal.category);
   const eatOutElsewhere = plan.days.filter((_, i) => i !== dayIndex && d_mode(plan, i) === 'eatout').length;
 
-  const candidates = shuffled(meals, rng).filter((m) =>
+  const weightOf = weightFn(opts.history || [], opts.ratings);
+  const candidates = weightedShuffle(meals, rng, weightOf).filter((m) =>
     m.meal !== current &&
     !otherNames.includes(m.meal) &&
     !otherCats.includes(m.category) &&
@@ -117,7 +149,7 @@ export function rerollDay(plan, dayIndex, meals, opts = {}) {
 
 function d_mode(plan, i) { return plan.days[i].mode; }
 
-// Re-roll every unlocked day, keeping locked days fixed.
+// Retained + unit-tested; no longer called by the app after the per-day lock was removed.
 export function regenerateUnlocked(plan, meals, opts = {}) {
   const cfg = { ...RULE_DEFAULTS, ...opts };
   const rng = opts.rng || Math.random;
@@ -125,11 +157,12 @@ export function regenerateUnlocked(plan, meals, opts = {}) {
   const fixed = locked.map((d) => d.meal);
   const need = 7;
   const pool = meals.slice();
+  const weightOf = weightFn(opts.history || [], opts.ratings);
 
   let picks = null;
   for (const relaxedList of LADDER) {
     const relaxed = new Set(relaxedList);
-    picks = select(pool, need, cfg, relaxed, rng, fixed);
+    picks = select(pool, need, cfg, relaxed, rng, fixed, weightOf);
     if (picks) {
       // picks starts with the fixed (locked) meals; map back onto day positions.
       const unlockedPicks = picks.slice(fixed.length);

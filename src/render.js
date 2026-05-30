@@ -15,7 +15,7 @@ function dealPill(deal) {
 }
 
 // dayIndex is needed so event handlers in app.js can map clicks back to a day.
-export function dayCardHTML(day, dayIndex, deal, meals = []) {
+export function dayCardHTML(day, dayIndex, deal) {
   const isEat = day.mode === 'eatout';
   const label = `${day.day.toUpperCase()}${isEat ? ' · EAT OUT' : ''}`;
   const pills = [
@@ -23,24 +23,21 @@ export function dayCardHTML(day, dayIndex, deal, meals = []) {
     day.meal.healthy ? healthyPill() : '',
     (isEat && deal) ? dealPill(deal) : '',
   ].join('');
-  const lockCls = day.locked ? ' is-locked' : '';
   const badge = isEat
-    ? `<span class="badge badge-eatout" aria-hidden="true">${ICONS.star}</span>`
-    : `<span class="badge badge-cook" aria-hidden="true">${ICONS.pot}</span>`;
+    ? `<span class="badge badge-eatout" aria-hidden="true">${ICONS.utensils}</span>`
+    : `<span class="badge badge-cook" aria-hidden="true">${ICONS.home}</span>`;
   return `
-    <article class="card ${isEat ? 'eatout' : 'cook'}${lockCls}" data-day="${dayIndex}">
+    <article class="card ${isEat ? 'eatout' : 'cook'}" data-day="${dayIndex}">
       ${badge}
       <p class="day-label">${esc(label)}</p>
       <h3 class="meal-name">${esc(day.meal.meal)}</h3>
-      <div class="pill-row">
-        ${pills}
-        <button class="btn-swap" data-action="swap" data-day="${dayIndex}" aria-label="Swap ${esc(day.meal.meal)}">${ICONS.refresh}</button>
-        <button class="btn-lock${day.locked ? ' is-on' : ''}" data-action="lock" data-day="${dayIndex}" aria-label="Lock this day" aria-pressed="${day.locked}">${ICONS.lock}</button>
+      <div class="pill-row">${pills}</div>
+      <div class="card-footer">
+        <span class="change-label" aria-hidden="true">Change</span>
+        <button class="btn-icon" data-action="swap" data-day="${dayIndex}" aria-label="Shuffle ${esc(day.meal.meal)}">${ICONS.refresh}</button>
+        <button class="btn-icon" data-action="pick" data-day="${dayIndex}" aria-label="Pick a meal for ${esc(day.day)}">${ICONS.list}</button>
       </div>
-      <div class="override">
-        ${daySelectHTML(day, dayIndex, meals)}
-        <p class="override-warn" data-warn="${dayIndex}"></p>
-      </div>
+      <p class="override-warn" data-warn="${dayIndex}"></p>
     </article>`;
 }
 
@@ -54,7 +51,9 @@ export function shoppingRowHTML(item, checked) {
     </label>`;
 }
 
-export function mealRowHTML(meal) {
+export function mealRowHTML(meal, rating) {
+  const thumb = (dir, icon) =>
+    `<button class="btn-thumb${rating === dir ? ' is-on' : ''}" data-action="rate" data-meal="${esc(meal.meal)}" data-rate="${esc(dir)}" aria-pressed="${rating === dir}" aria-label="Thumbs ${dir} ${esc(meal.meal)}">${icon}</button>`;
   return `
     <article class="meal-row">
       <h3 class="meal-name">${esc(meal.meal)}</h3>
@@ -62,6 +61,7 @@ export function mealRowHTML(meal) {
         <span class="pill pill-cat">${esc(meal.category)}</span>
         <span class="pill pill-where">${esc(meal.where)}</span>
         ${meal.healthy ? healthyPill() : ''}
+        <span class="thumbs">${thumb('up', ICONS.thumbUp)}${thumb('down', ICONS.thumbDown)}</span>
       </div>
       <p class="meal-ings">${esc(meal.ingredients.join(', '))}</p>
     </article>`;
@@ -82,8 +82,17 @@ export function evaluateOverride(plan, dayIndex, meal) {
   return '';
 }
 
-export function daySelectHTML(day, dayIndex, meals) {
-  const opts = meals.map((m) =>
-    `<option value="${esc(m.meal)}"${m.meal === day.meal.meal ? ' selected' : ''}>${esc(m.meal)} (${esc(m.category)})</option>`).join('');
-  return `<select class="day-select" data-action="override" data-day="${dayIndex}" aria-label="Choose meal for ${esc(day.day)}">${opts}</select>`;
+// Bottom-sheet markup listing every meal as a tap-to-pick option for `dayIndex`.
+export function pickerSheetHTML(dayIndex, meals) {
+  const rows = meals.map((m) =>
+    `<button class="picker-row" data-action="pick-meal" data-day="${dayIndex}" data-meal="${esc(m.meal)}">
+       <span class="picker-name">${esc(m.meal)}</span>
+       <span class="picker-cat">${esc(m.category)}</span>
+     </button>`).join('');
+  return `
+    <div class="picker-backdrop" data-action="picker-close"></div>
+    <div class="picker-sheet" role="dialog" aria-modal="true" aria-labelledby="picker-title">
+      <h2 class="picker-title" id="picker-title">Pick a meal</h2>
+      <div class="picker-list">${rows}</div>
+    </div>`;
 }

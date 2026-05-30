@@ -28,12 +28,12 @@ polish & ship) all landed in **v0.1.0**. See [CHANGELOG.md](CHANGELOG.md) for th
 
 - [ ] **Leftovers / "cook once, eat twice"** — mark a meal to fill two days.
 - [ ] **Servings & quantities** in the shopping list (needs a qty column in the Sheet).
-- [ ] **History view** — see past weeks; "we haven't had this in a while" nudges.
-- [ ] **Avoid repeats for N weeks** (not just last week) once history is rich enough.
+- [ ] **History view** — browse past weeks. (The generator already *uses* recent history to
+      fade repeats; this would be the UI to actually see it.)
 - [ ] **Dark mode** (`prefers-color-scheme`).
 - [ ] **Share/export** the shopping list (copy to clipboard / text to phone).
 - [ ] **Per-day notes** ("defrost chicken", "kids at grandma's").
-- [ ] **Seasonal / favorite weighting** in the generator.
+- [ ] **Seasonal weighting** in the generator (favorite weighting shipped via 👍/👎 ratings).
 
 ---
 

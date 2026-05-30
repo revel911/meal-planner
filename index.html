@@ -63,7 +63,6 @@
       border-radius:var(--r-card); padding:14px 14px 12px 14px; overflow:hidden;
     }
     .card.eatout{background:rgba(198,161,76,.07); border-color:rgba(198,161,76,.45)}
-    .card.is-locked{border-color:var(--gold); box-shadow:0 0 0 1px var(--gold) inset}
     .badge{position:absolute; top:14px; left:14px; width:34px; height:34px; border-radius:9px;
       display:grid; place-items:center}
     .badge svg{width:20px; height:20px}
@@ -86,12 +85,6 @@
     .pill-staple{background:var(--gold-soft); color:var(--gold-hi)}
 
     /* buttons */
-    .btn-swap{margin-left:auto; width:30px; height:30px; border-radius:999px; background:transparent;
-      border:1.5px solid rgba(198,161,76,.45); color:var(--gold); display:grid; place-items:center; cursor:pointer}
-    .btn-swap svg{width:16px; height:16px}
-    .btn-lock{border:0; background:none; cursor:pointer; color:var(--cream-muted)}
-    .btn-lock.is-on{color:var(--gold)}
-    .btn-lock svg{width:18px; height:18px}
     .btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold-2)); color:var(--ink-on-gold);
       border:0; border-radius:999px; padding:12px 22px; font-weight:700; letter-spacing:.04em; cursor:pointer;
       min-height:44px; box-shadow:0 8px 20px rgba(181,140,56,.3)}
@@ -120,10 +113,34 @@
     .meal-row .meal-name{margin-left:0}
     .meal-ings{color:var(--cream-muted); font-size:.75rem; font-weight:600; margin:8px 0 0}
 
-    .override{margin-top:10px}
-    .day-select{width:100%; padding:8px 10px; border:1px solid var(--surface-line); border-radius:var(--r-chip);
-      background:rgba(0,0,0,.18); color:var(--cream); font-weight:600; min-height:44px}
     .override-warn{color:var(--gold-hi); font-size:.72rem; font-weight:700; margin:6px 0 0}
+
+    /* card Change footer */
+    .card-footer{display:flex; align-items:center; gap:8px; margin:12px -14px 0; padding:10px 14px 0;
+      border-top:1px solid rgba(236,231,217,.10)}
+    .change-label{margin-right:auto; font-size:.56rem; font-weight:700; letter-spacing:.12em;
+      text-transform:uppercase; color:var(--cream-muted)}
+    .btn-icon{width:32px; height:32px; border-radius:999px; background:transparent;
+      border:1.5px solid rgba(198,161,76,.45); color:var(--gold); display:grid; place-items:center; cursor:pointer}
+    .btn-icon svg{width:16px; height:16px}
+
+    /* meals-tab thumbs */
+    .thumbs{margin-left:auto; display:flex; gap:6px}
+    .btn-thumb{width:30px; height:30px; border-radius:999px; background:transparent;
+      border:1px solid var(--surface-line); color:var(--cream-muted); display:grid; place-items:center; cursor:pointer}
+    .btn-thumb svg{width:16px; height:16px}
+    .btn-thumb.is-on{color:var(--gold); border-color:rgba(198,161,76,.55); background:var(--gold-soft)}
+
+    /* picker bottom sheet */
+    .picker-backdrop{position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:20}
+    .picker-sheet{position:fixed; left:0; right:0; bottom:0; z-index:21; max-height:70vh; overflow:auto;
+      background:#222a23; border:1px solid rgba(198,161,76,.25); border-radius:18px 18px 0 0;
+      padding:16px 16px max(16px, env(safe-area-inset-bottom)); max-width:840px; margin:0 auto}
+    .picker-title{font-family:var(--serif); font-size:1.2rem; color:var(--cream); margin:0 0 12px}
+    .picker-row{display:flex; justify-content:space-between; align-items:center; width:100%; gap:10px;
+      background:transparent; border:0; border-bottom:1px solid rgba(236,231,217,.08);
+      padding:12px 4px; color:var(--cream); font-size:.95rem; text-align:left; cursor:pointer; min-height:44px}
+    .picker-cat{color:var(--cream-muted); font-size:.72rem; font-weight:600}
 
     [hidden]{display:none !important}
     @media (prefers-reduced-motion: no-preference){
@@ -142,7 +159,7 @@
       <div id="plan-banner"></div>
       <div class="action-row">
         <button class="btn-primary" id="btn-generate">Generate week</button>
-        <button class="btn-soft" id="btn-reroll" hidden>Re-roll unlocked</button>
+        <button class="btn-soft" id="btn-reroll" hidden>Reshuffle week</button>
         <span class="healthy-meter" id="healthy-meter"></span>
       </div>
       <div class="cards" id="plan-cards"></div>
@@ -161,6 +178,7 @@
       <p class="sub">From the shared Google Sheet (read-only)</p>
       <div id="meals-list"></div>
     </section>
+    <div id="picker-host" hidden></div>
   </main>
 
   <nav class="tabbar" role="tablist" aria-label="Sections">
