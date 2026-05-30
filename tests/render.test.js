@@ -98,3 +98,11 @@ test('pickerSheetHTML lists every meal as a pick option for the given day', () =
   assert.match(html, /Tacos/);
   assert.match(html, /Sushi/);
 });
+
+test('pickerSheetHTML escapes meal names with special characters', () => {
+  const html = pickerSheetHTML(0, [{ meal: 'Mac "n" Cheese & Co <x>', category: 'Comfort' }]);
+  assert.doesNotMatch(html, /data-meal="Mac "n"/);   // raw quote would break the attribute
+  assert.match(html, /&quot;n&quot;/);
+  assert.match(html, /&amp;/);
+  assert.match(html, /&lt;x&gt;/);
+});

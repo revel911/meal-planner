@@ -33,7 +33,7 @@ export function dayCardHTML(day, dayIndex, deal) {
       <h3 class="meal-name">${esc(day.meal.meal)}</h3>
       <div class="pill-row">${pills}</div>
       <div class="card-footer">
-        <span class="change-label">Change</span>
+        <span class="change-label" aria-hidden="true">Change</span>
         <button class="btn-icon" data-action="swap" data-day="${dayIndex}" aria-label="Shuffle ${esc(day.meal.meal)}">${ICONS.refresh}</button>
         <button class="btn-icon" data-action="pick" data-day="${dayIndex}" aria-label="Pick a meal for ${esc(day.day)}">${ICONS.list}</button>
       </div>
@@ -53,7 +53,7 @@ export function shoppingRowHTML(item, checked) {
 
 export function mealRowHTML(meal, rating) {
   const thumb = (dir, icon) =>
-    `<button class="btn-thumb${rating === dir ? ' is-on' : ''}" data-action="rate" data-meal="${esc(meal.meal)}" data-rate="${dir}" aria-pressed="${rating === dir}" aria-label="Thumbs ${dir} ${esc(meal.meal)}">${icon}</button>`;
+    `<button class="btn-thumb${rating === dir ? ' is-on' : ''}" data-action="rate" data-meal="${esc(meal.meal)}" data-rate="${esc(dir)}" aria-pressed="${rating === dir}" aria-label="Thumbs ${dir} ${esc(meal.meal)}">${icon}</button>`;
   return `
     <article class="meal-row">
       <h3 class="meal-name">${esc(meal.meal)}</h3>
@@ -91,8 +91,8 @@ export function pickerSheetHTML(dayIndex, meals) {
      </button>`).join('');
   return `
     <div class="picker-backdrop" data-action="picker-close"></div>
-    <div class="picker-sheet" role="dialog" aria-label="Pick a meal">
-      <h2 class="picker-title">Pick a meal</h2>
+    <div class="picker-sheet" role="dialog" aria-modal="true" aria-labelledby="picker-title">
+      <h2 class="picker-title" id="picker-title">Pick a meal</h2>
       <div class="picker-list">${rows}</div>
     </div>`;
 }
