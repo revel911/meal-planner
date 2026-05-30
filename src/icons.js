@@ -17,7 +17,7 @@ export const ICONS = {
     <path class="stroke" d="M8 3.5v6m-2-6v4m4-4v4m-2 2v9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     <path class="stroke" d="M16 3.5c2 1.5 2 5 0 6.5v9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`),
   refresh: svg(`
-    <path class="fill" d="M19.5 9A8 8 0 1 0 20 14L19.5 9Z" fill="currentColor" opacity=".16"/>
+    <circle class="fill" cx="12" cy="12" r="8" fill="currentColor" opacity=".16"/>
     <path class="stroke" d="M19.5 9A8 8 0 1 0 20 14M20 4.5V9h-4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`),
   leaf: svg(`
     <path class="fill" d="M19 5C11 5 6 9.5 6.5 16.5 13.5 17 19 12 19 5Z" fill="currentColor" opacity=".16"/>
