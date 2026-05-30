@@ -1,8 +1,10 @@
-const CACHE = 'dinner-v1';
+const CACHE = 'dinner-v2';
 const SHELL = [
   '.', 'index.html', 'manifest.webmanifest',
   'src/app.js', 'src/config.js', 'src/csv.js', 'src/model.js', 'src/generator.js',
   'src/deals.js', 'src/shopping.js', 'src/store.js', 'src/sheet.js', 'src/render.js', 'src/icons.js',
+  'fonts/inter-400.woff2', 'fonts/inter-500.woff2', 'fonts/inter-600.woff2', 'fonts/inter-700.woff2',
+  'fonts/playfair-700.woff2', 'fonts/playfair-700italic.woff2',
 ];
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
