@@ -10,7 +10,30 @@ project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-Nothing yet — see [ROADMAP.md](ROADMAP.md) for the next follow-ups.
+### Added
+- **Thumbs up / down per meal** (Meals tab): liked meals become ~2.5× more likely to be
+  picked and disliked ones ~¼ as likely — across generate, single-day shuffle, and reshuffle.
+  Nothing is ever fully banned. Tap an active thumb to clear it back to neutral. Ratings sync
+  via Firebase alongside the plan.
+- **Rolling 3-week history with soft fade:** the generator now remembers the last three weeks.
+  The most-recent week stays a hard no-repeat; meals from 2–3 weeks ago are de-prioritized
+  (not excluded) so newer/unused meals surface first but can still reappear. Replaces the
+  previous single-week memory.
+- **Home / eat-out badge** on day cards — a house icon for cook-at-home, gold utensils for
+  eat-out — replacing the earlier pot/star badge.
+
+### Changed
+- **Day card redesign:** the always-open per-day override dropdown is gone; picking a specific
+  meal now happens in a tap-to-open **picker bottom sheet**. Each card has a hairline "Change"
+  footer with a shuffle (⟳, random reroll) and a list (☰, pick from all meals) button.
+- **"Re-roll unlocked" → "Reshuffle week"**, which re-rolls all seven days (weighted by history
+  and ratings, and avoiding the current week).
+- Generator selection ordering is now a weighted shuffle (recency × rating). All hard rules and
+  the lowest-priority-first relaxation ladder are unchanged, so no new "not enough meals" cases.
+
+### Removed
+- The per-day **lock** button and the inline override `<select>` dropdown — superseded by the
+  picker sheet and per-day shuffle.
 
 ## [0.1.0] — 2026-05-29
 
