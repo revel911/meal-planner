@@ -99,28 +99,30 @@
     .action-row{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:14px 0}
 
     /* banners / states */
-    .banner{background:var(--mint-bg); color:var(--pine); border-radius:var(--r-chip); padding:10px 12px;
-      font-size:.78rem; font-weight:600; margin:0 0 12px}
-    .banner.warn{background:var(--coral-bg); color:var(--coral)}
-    .empty{color:var(--muted); text-align:center; padding:40px 16px; font-weight:600}
-    .healthy-meter{font-size:.78rem; font-weight:700; color:var(--pine)}
+    .banner{background:var(--sage-leaf-bg); color:var(--sage-leaf); border-radius:var(--r-chip);
+      padding:10px 12px; font-size:.78rem; font-weight:600; margin:0 0 12px}
+    .banner.warn{background:var(--gold-soft); color:var(--gold-hi)}
+    .empty{color:var(--cream-muted); text-align:center; padding:40px 16px; font-weight:600}
+    .healthy-meter{font-size:.78rem; font-weight:700; color:var(--gold-hi)}
 
     /* shopping */
-    .aisle-h{font-size:.7rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
-      color:var(--muted); margin:16px 0 6px}
-    .shop-row{display:flex; align-items:center; gap:10px; background:var(--surface); border-radius:12px;
-      padding:10px 12px; margin-bottom:6px; box-shadow:var(--shadow-rest)}
-    .shop-row.is-checked .shop-name{text-decoration:line-through; color:var(--muted)}
-    .shop-name{font-weight:700; font-size:.9rem}
-    .shop-meals{margin-left:auto; color:var(--muted); font-size:.7rem; font-weight:600}
-    .meal-row{background:var(--surface); border-radius:var(--r-card); padding:12px 14px; margin-bottom:10px;
-      box-shadow:var(--shadow-rest)}
-    .meal-ings{color:var(--muted); font-size:.75rem; font-weight:600; margin:8px 0 0}
+    .aisle-h{font-size:.7rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+      color:var(--cream-muted); margin:16px 0 6px}
+    .shop-row{display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--surface-line);
+      border-radius:12px; padding:10px 12px; margin-bottom:6px}
+    .shop-row input{accent-color:var(--gold)}
+    .shop-row.is-checked .shop-name{text-decoration:line-through; color:var(--cream-muted)}
+    .shop-name{font-weight:600; font-size:.9rem; color:var(--cream)}
+    .shop-meals{margin-left:auto; color:var(--cream-muted); font-size:.7rem; font-weight:600}
+    .meal-row{background:var(--surface); border:1px solid var(--surface-line); border-radius:var(--r-card);
+      padding:12px 14px; margin-bottom:10px}
+    .meal-row .meal-name{margin-left:0}
+    .meal-ings{color:var(--cream-muted); font-size:.75rem; font-weight:600; margin:8px 0 0}
 
     .override{margin-top:10px}
-    .day-select{width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:var(--r-chip);
-      background:var(--surface); color:var(--ink); font-weight:600; min-height:44px}
-    .override-warn{color:var(--coral); font-size:.72rem; font-weight:700; margin:6px 0 0}
+    .day-select{width:100%; padding:8px 10px; border:1px solid var(--surface-line); border-radius:var(--r-chip);
+      background:rgba(0,0,0,.18); color:var(--cream); font-weight:600; min-height:44px}
+    .override-warn{color:var(--gold-hi); font-size:.72rem; font-weight:700; margin:6px 0 0}
 
     [hidden]{display:none !important}
     @media (prefers-reduced-motion: no-preference){
