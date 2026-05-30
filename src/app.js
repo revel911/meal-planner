@@ -196,6 +196,9 @@ function wireEvents() {
     renderMeals();
   });
   $('#shopping-list').addEventListener('change', onCheck);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !$('#picker-host').hidden) closePicker();
+  });
 }
 
 async function init() {

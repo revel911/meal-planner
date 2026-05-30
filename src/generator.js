@@ -8,7 +8,9 @@ const RATING_WEIGHT = { up: 2.5, down: 0.25 }; // ~10x spread; neutral/absent = 
 // Soft de-prioritize meals from 2-3 weeks ago. History is most-recent-first;
 // index 0 (the most recent week) is excluded by the pool filter, never weighted,
 // so this table is indexed by weeks-ago starting at 1 (index 0 is a placeholder).
-const RECENCY_WEIGHT = [/* unused */ 1, 0.25, 0.5];
+// Index 3 (4 weeks ago, possible since the generate path prepends the current week
+// onto up-to-3 stored weeks) is full weight 1 = neutral, i.e. fully faded back in.
+const RECENCY_WEIGHT = [/* unused */ 1, 0.25, 0.5, 1];
 
 export function ratingWeight(mealName, ratings = {}) {
   return RATING_WEIGHT[(ratings || {})[mealName]] ?? 1;
@@ -147,7 +149,7 @@ export function rerollDay(plan, dayIndex, meals, opts = {}) {
 
 function d_mode(plan, i) { return plan.days[i].mode; }
 
-// Re-roll every unlocked day, keeping locked days fixed.
+// Retained + unit-tested; no longer called by the app after the per-day lock was removed.
 export function regenerateUnlocked(plan, meals, opts = {}) {
   const cfg = { ...RULE_DEFAULTS, ...opts };
   const rng = opts.rng || Math.random;
