@@ -46,13 +46,13 @@
 
     /* tabs */
     .tabbar{
-      position:fixed; left:0; right:0; bottom:0; display:flex; background:var(--surface);
-      border-top:1px solid var(--line); padding:6px 0 max(6px, env(safe-area-inset-bottom));
-      z-index:10;
+      position:fixed; left:0; right:0; bottom:0; display:flex; z-index:10;
+      background:rgba(18,22,18,.72); backdrop-filter:blur(8px);
+      border-top:1px solid rgba(198,161,76,.14); padding:6px 0 max(6px, env(safe-area-inset-bottom));
     }
-    .tab{flex:1; background:none; border:0; color:var(--muted); display:flex; flex-direction:column;
-      align-items:center; gap:2px; font-size:.62rem; font-weight:700; cursor:pointer; min-height:44px}
-    .tab[aria-selected="true"]{color:var(--pine)}
+    .tab{flex:1; background:none; border:0; color:var(--cream-muted); display:flex; flex-direction:column;
+      align-items:center; gap:3px; font-size:.6rem; font-weight:600; cursor:pointer; min-height:44px}
+    .tab[aria-selected="true"]{color:var(--gold)}
     .tab svg{display:block}
 
     /* day cards */
@@ -133,7 +133,8 @@
   <main class="wrap">
     <!-- PLAN -->
     <section id="screen-plan" class="screen">
-      <h1 class="screen-title">This Week</h1>
+      <p class="kicker">Your Week</p>
+      <h1 class="screen-title">This <em>Week</em></h1>
       <p class="sub" id="plan-sub">Monday–Sunday dinners</p>
       <div id="plan-banner"></div>
       <div class="action-row">

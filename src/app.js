@@ -35,7 +35,7 @@ const RELAX_TEXT = {
 
 function paintTabIcons() {
   $('#tab-plan').innerHTML = `${ICONS.calendar}<span>Plan</span>`;
-  $('#tab-shopping').innerHTML = `${ICONS.cart}<span>Shopping</span>`;
+  $('#tab-shopping').innerHTML = `${ICONS.bag}<span>Shopping</span>`;
   $('#tab-meals').innerHTML = `${ICONS.utensils}<span>Meals</span>`;
 }
 
