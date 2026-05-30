@@ -3,27 +3,46 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-  <meta name="theme-color" content="#1F6E54"/>
+  <meta name="theme-color" content="#2F382F"/>
   <link rel="manifest" href="manifest.webmanifest"/>
   <title>Family Dinner Planner</title>
   <style>
+    @font-face{font-family:'Inter';font-style:normal;font-weight:400;font-display:swap;src:url('fonts/inter-400.woff2') format('woff2')}
+    @font-face{font-family:'Inter';font-style:normal;font-weight:500;font-display:swap;src:url('fonts/inter-500.woff2') format('woff2')}
+    @font-face{font-family:'Inter';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/inter-600.woff2') format('woff2')}
+    @font-face{font-family:'Playfair Display';font-style:normal;font-weight:700;font-display:swap;src:url('fonts/playfair-700.woff2') format('woff2')}
+    @font-face{font-family:'Playfair Display';font-style:italic;font-weight:700;font-display:swap;src:url('fonts/playfair-700italic.woff2') format('woff2')}
+
     :root{
-      --pine:#1F6E54; --mint:#6FD3A6; --mint-bg:#E3F5EC; --paper:#FAF8F3; --surface:#FFFFFF;
-      --coral:#FF7A5C; --coral-bg:#FFE7DF; --ink:#1B2D26; --muted:#7C8B83;
-      --peach:#FCEBE2; --peach-tx:#C65A3A; --line:#EFE9DD;
-      --r-card:18px; --r-chip:14px; --shadow-rest:0 4px 14px rgba(27,45,38,.06);
-      --shadow-raise:0 14px 36px rgba(27,45,38,.16);
+      --bg:#2F382F; --bg-2:#3B453D;
+      --surface:rgba(255,255,255,.05); --surface-line:rgba(198,161,76,.15);
+      --gold:#C6A14C; --gold-2:#B58C38; --gold-hi:#D9B863; --gold-soft:rgba(198,161,76,.16);
+      --cream:#ECE7D9; --cream-muted:#9FA89B;
+      --sage-leaf:#BDCB9E; --sage-leaf-bg:rgba(169,185,140,.18);
+      --ink-on-gold:#2A2616; --line:rgba(236,231,217,.12);
+      --serif:'Playfair Display',Georgia,'Times New Roman',serif;
+      --sans:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      --r-card:18px; --r-chip:14px;
+      --shadow-rest:0 4px 14px rgba(0,0,0,.22);
+      --shadow-raise:0 14px 36px rgba(0,0,0,.34);
     }
     *{box-sizing:border-box}
     html,body{margin:0}
     body{
-      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-      background:var(--paper); color:var(--ink);
-      padding-bottom:72px; /* room for fixed tab bar */
+      font-family:var(--sans);
+      background:linear-gradient(160deg,var(--bg-2) 0%,var(--bg) 60%) fixed; color:var(--cream);
+      min-height:100vh; padding-bottom:72px; /* room for fixed tab bar */
     }
-    .wrap{max-width:840px; margin:0 auto; padding:16px}
-    .screen-title{font-size:1.5rem; font-weight:800; letter-spacing:-.01em; margin:8px 0 4px}
-    .sub{color:var(--muted); font-size:.8rem; font-weight:600; margin:0 0 16px}
+    /* soft radial gold glow behind the header */
+    body::before{content:""; position:fixed; top:-120px; right:-120px; width:320px; height:320px;
+      background:radial-gradient(circle at 30% 30%, rgba(198,161,76,.13), rgba(255,255,255,0) 70%);
+      pointer-events:none; z-index:0;}
+    .wrap{max-width:840px; margin:0 auto; padding:16px; position:relative; z-index:1}
+    .kicker{font-size:.56rem; font-weight:600; letter-spacing:.3em; text-transform:uppercase; color:var(--gold); margin:8px 0 0}
+    .screen-title{font-family:var(--serif); font-size:2rem; font-weight:700; letter-spacing:0; color:var(--cream); margin:2px 0 6px}
+    .screen-title em{color:var(--gold); font-style:italic}
+    .sub{color:var(--cream-muted); font-size:.62rem; font-weight:600; letter-spacing:.16em; text-transform:uppercase; margin:0 0 16px}
+    :focus-visible{outline:2px solid var(--gold); outline-offset:2px; border-radius:4px}
 
     /* tabs */
     .tabbar{
