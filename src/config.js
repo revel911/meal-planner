@@ -17,7 +17,9 @@ export const RULE_DEFAULTS = {
 // localStorage / Firebase key names (namespaced)
 export const KEYS = {
   plan: 'mp:plan',
-  lastWeek: 'mp:lastweek',   // string[] of meal names from the previously saved plan
+  lastWeek: 'mp:lastweek',   // legacy: single previous week; read once for migration
+  history: 'mp:history',     // string[][] of up to 3 recent weeks, most-recent first
+  ratings: 'mp:ratings',     // { [mealName]: 'up' | 'down' }  (neutral = absent)
   staples: 'mp:staples',     // string[] of ingredient keys always kept on hand
   checked: 'mp:checked',     // string[] of currently-checked shopping keys
 };

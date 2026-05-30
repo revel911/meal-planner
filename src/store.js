@@ -28,9 +28,30 @@ export function createStore(backend) {
     setPlan: (plan) => writeJSON(KEYS.plan, plan),
     getStaples: () => readJSON(KEYS.staples, DEFAULT_STAPLES.slice()),
     setStaples: (arr) => writeJSON(KEYS.staples, arr),
-    getLastWeek: () => readJSON(KEYS.lastWeek, []),
-    setLastWeek: (arr) => writeJSON(KEYS.lastWeek, arr),
     getChecked: () => readJSON(KEYS.checked, []),
     setChecked: (arr) => writeJSON(KEYS.checked, arr),
+
+    async getHistory() {
+      const hist = await readJSON(KEYS.history, null);
+      if (hist) return hist;
+      // One-time fallback: seed from the legacy single-week key if present.
+      const legacy = await readJSON(KEYS.lastWeek, null);
+      return legacy && legacy.length ? [legacy] : [];
+    },
+    async pushHistory(week) {
+      const hist = await this.getHistory();
+      const next = [week, ...hist].slice(0, 3);
+      await writeJSON(KEYS.history, next);
+      return next;
+    },
+
+    getRatings: () => readJSON(KEYS.ratings, {}),
+    async setRating(mealName, value) {
+      const ratings = await readJSON(KEYS.ratings, {});
+      if (value === 'up' || value === 'down') ratings[mealName] = value;
+      else delete ratings[mealName];
+      await writeJSON(KEYS.ratings, ratings);
+      return ratings;
+    },
   };
 }

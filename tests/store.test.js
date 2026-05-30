@@ -22,17 +22,41 @@ test('staples default to config when unset, then persist', async () => {
   assert.deepEqual(await store.getStaples(), ['rice', 'oil']);
 });
 
-test('lastWeek + checked round-trip and default to []', async () => {
+test('checked round-trips and defaults to []', async () => {
   const store = createStore(memoryBackend());
-  assert.deepEqual(await store.getLastWeek(), []);
-  await store.setLastWeek(['Tacos']);
-  assert.deepEqual(await store.getLastWeek(), ['Tacos']);
   assert.deepEqual(await store.getChecked(), []);
   await store.setChecked(['rice']);
   assert.deepEqual(await store.getChecked(), ['rice']);
 });
 
 test('memoryBackend can seed initial values', async () => {
-  const store = createStore(memoryBackend({ 'mp:lastweek': JSON.stringify(['X']) }));
-  assert.deepEqual(await store.getLastWeek(), ['X']);
+  const store = createStore(memoryBackend({ 'mp:ratings': JSON.stringify({ X: 'up' }) }));
+  assert.deepEqual(await store.getRatings(), { X: 'up' });
+});
+
+test('history defaults to [], pushes most-recent-first and caps at 3', async () => {
+  const store = createStore(memoryBackend());
+  assert.deepEqual(await store.getHistory(), []);
+  assert.deepEqual(await store.pushHistory(['A', 'B']), [['A', 'B']]);
+  await store.pushHistory(['C']);
+  await store.pushHistory(['D']);
+  const capped = await store.pushHistory(['E']);
+  assert.equal(capped.length, 3, 'capped at 3 weeks');
+  assert.deepEqual(capped[0], ['E'], 'newest first');
+  assert.deepEqual(await store.getHistory(), capped);
+});
+
+test('history falls back to the legacy lastWeek key once', async () => {
+  const store = createStore(memoryBackend({ 'mp:lastweek': JSON.stringify(['Tacos']) }));
+  assert.deepEqual(await store.getHistory(), [['Tacos']]);
+});
+
+test('ratings default to {}, set, overwrite and clear to neutral', async () => {
+  const store = createStore(memoryBackend());
+  assert.deepEqual(await store.getRatings(), {});
+  await store.setRating('Tacos', 'up');
+  await store.setRating('Sushi', 'down');
+  assert.deepEqual(await store.getRatings(), { Tacos: 'up', Sushi: 'down' });
+  await store.setRating('Tacos', 'neutral'); // neutral removes the entry
+  assert.deepEqual(await store.getRatings(), { Sushi: 'down' });
 });
