@@ -10,6 +10,7 @@
     @font-face{font-family:'Inter';font-style:normal;font-weight:400;font-display:swap;src:url('fonts/inter-400.woff2') format('woff2')}
     @font-face{font-family:'Inter';font-style:normal;font-weight:500;font-display:swap;src:url('fonts/inter-500.woff2') format('woff2')}
     @font-face{font-family:'Inter';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/inter-600.woff2') format('woff2')}
+    @font-face{font-family:'Inter';font-style:normal;font-weight:700;font-display:swap;src:url('fonts/inter-700.woff2') format('woff2')}
     @font-face{font-family:'Playfair Display';font-style:normal;font-weight:700;font-display:swap;src:url('fonts/playfair-700.woff2') format('woff2')}
     @font-face{font-family:'Playfair Display';font-style:italic;font-weight:700;font-display:swap;src:url('fonts/playfair-700italic.woff2') format('woff2')}
 
@@ -99,9 +100,9 @@
     .action-row{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:14px 0}
 
     /* banners / states */
-    .banner{background:var(--sage-leaf-bg); color:var(--sage-leaf); border-radius:var(--r-chip);
-      padding:10px 12px; font-size:.78rem; font-weight:600; margin:0 0 12px}
-    .banner.warn{background:var(--gold-soft); color:var(--gold-hi)}
+    .banner{background:var(--surface); border:1px solid rgba(169,185,140,.35); color:var(--sage-leaf);
+      border-radius:var(--r-chip); padding:10px 12px; font-size:.78rem; font-weight:600; margin:0 0 12px}
+    .banner.warn{background:var(--surface); border-color:rgba(198,161,76,.45); color:var(--gold-hi)}
     .empty{color:var(--cream-muted); text-align:center; padding:40px 16px; font-weight:600}
     .healthy-meter{font-size:.78rem; font-weight:700; color:var(--gold-hi)}
 
