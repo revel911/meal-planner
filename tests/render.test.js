@@ -90,10 +90,14 @@ test('evaluateOverride flags back-to-back category and bought overflow', () => {
   assert.equal(evaluateOverride(plan, 0, { meal: 'F', category: 'Greek', where: 'Home' }), '');
 });
 
-test('dayCardHTML has Change footer with shuffle + list, and no dropdown or lock', () => {
+test('dayCardHTML uses a compact head with inline actions and no footer', () => {
   const html = dayCardHTML(COOK_DAY, 0);
+  assert.match(html, /class="card-head"/);
+  assert.match(html, /class="card-actions"/);
   assert.match(html, /data-action="swap"/);
   assert.match(html, /data-action="pick"/);
+  assert.doesNotMatch(html, /card-footer/);
+  assert.doesNotMatch(html, /change-label/);
   assert.doesNotMatch(html, /data-action="lock"/);
   assert.doesNotMatch(html, /<select/);
 });

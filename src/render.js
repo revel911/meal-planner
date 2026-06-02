@@ -42,15 +42,18 @@ export function dayCardHTML(day, dayIndex) {
       : `<span class="badge badge-cook" aria-hidden="true">${ICONS.home}</span>`;
   return `
     <article class="card ${isEat ? 'eatout' : 'cook'}" data-day="${dayIndex}">
-      ${badge}
-      <p class="day-label">${esc(label)}</p>
-      <h3 class="meal-name">${esc(m.meal)}</h3>
-      <div class="pill-row">${pills}</div>
-      <div class="card-footer">
-        <span class="change-label" aria-hidden="true">Change</span>
-        <button class="btn-icon" data-action="swap" data-day="${dayIndex}" aria-label="Shuffle ${esc(m.meal)}">${ICONS.refresh}</button>
-        <button class="btn-icon" data-action="pick" data-day="${dayIndex}" aria-label="Pick a meal for ${esc(day.day)}">${ICONS.list}</button>
+      <div class="card-head">
+        ${badge}
+        <div class="card-title">
+          <span class="day-label">${esc(label)}</span>
+          <h3 class="meal-name">${esc(m.meal)}</h3>
+        </div>
+        <div class="card-actions">
+          <button class="btn-icon" data-action="swap" data-day="${dayIndex}" aria-label="Shuffle ${esc(m.meal)}">${ICONS.refresh}</button>
+          <button class="btn-icon" data-action="pick" data-day="${dayIndex}" aria-label="Pick a meal for ${esc(day.day)}">${ICONS.list}</button>
+        </div>
       </div>
+      <div class="pill-row">${pills}</div>
       <p class="override-warn" data-warn="${dayIndex}"></p>
     </article>`;
 }

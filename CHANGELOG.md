@@ -40,6 +40,10 @@ project aims to follow [Semantic Versioning](https://semver.org/).
   eat-out — replacing the earlier pot/star badge.
 
 ### Changed
+- **Compact Plan layout for phones:** the day cards are now two-row (badge + inline day/meal +
+  shuffle/pick icons, then a pill row), roughly half their old height; and the top header is
+  slimmed — the kicker and the "Monday–Sunday dinners" subtitle are gone, "This Week" is smaller,
+  and the Healthy meter sits inline beside it. Much less scrolling per week.
 - **Generator rewritten** from "pick a valid set of 7 meals" to "fill seven day-slots" so it
   can enforce back-to-back spacing and deal-day placement. The relaxation ladder now drops
   `healthy → spacing → bought-cap → repeat`; deal pins are never relaxed.
