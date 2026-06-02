@@ -104,10 +104,10 @@ button (right). Lock toggle alongside.
 - **Deal / Staple** — `--gold-soft` fill, `--gold-hi` text (+ tag icon for deals).
 
 ### Buttons
-- **Primary** ("Generate week") — gold gradient (`--gold`→`--gold-2`), `--ink-on-gold` text, soft gold glow.
-- **Soft** ("Re-roll unlocked") — transparent, gold-outline, `--gold-hi` text.
+- **Primary** ("Generate week") — gold gradient (`--gold`→`--gold-2`), `--ink-on-gold` text, soft gold glow. Compact in the Plan action row (~36px tall); dims to `.45` opacity while disabled (week locked).
+- **Soft** — transparent, gold-outline, `--gold-hi` text (now used only by the Meals "Reload from Sheet" button).
 - **Swap (icon)** — 30px circle, transparent, gold-outline, gold refresh icon.
-- **Lock (icon)** — bare; `--cream-muted`, turns `--gold` when on.
+- **Week lock (icon)** — 36px circle in the Plan action row beside Generate; gold-outline when off, fills with the gold gradient when on. Toggling on freezes the current week (disables Generate and hides the per-day swap/pick) until unlocked.
 
 ### Bottom tab bar
 Dark frosted glass (`rgba(18,22,18,.72)` + `backdrop-filter:blur(8px)` with the

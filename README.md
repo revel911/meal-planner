@@ -53,7 +53,7 @@ Google Sheet (published CSV)
   health-tracker).
 
 > ✅ **Status:** **v0.1.0 — MVP shipped.** The full app is built: rule-respecting week
-> generator, per-day swap/lock/override with live rule warnings, deal suggestions on
+> generator, per-day swap/pick with live rule warnings, a week lock, deal suggestions on
 > eat-out nights, aisle-grouped shopping list with persistent staples, and optional
 > Firebase sync. See [CHANGELOG.md](CHANGELOG.md) for what shipped and
 > [ROADMAP.md](ROADMAP.md) for what's still ahead.

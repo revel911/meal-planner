@@ -118,6 +118,10 @@
     .btn-soft{background:transparent; color:var(--gold-hi); border:1.5px solid rgba(198,161,76,.45);
       border-radius:999px; padding:10px 16px; font-weight:700; cursor:pointer; min-height:44px}
     .action-row{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:14px 0}
+    /* compact action-row buttons on the Plan screen */
+    #screen-plan .action-row .btn-primary{padding:8px 16px; min-height:36px; font-size:.82rem; box-shadow:0 6px 16px rgba(181,140,56,.28)}
+    #screen-plan .action-row .btn-primary:disabled{opacity:.45; cursor:default; box-shadow:none}
+    #screen-plan .action-row .btn-lock{width:36px; height:36px}
 
     /* banners / states */
     .banner{background:var(--surface); border:1px solid rgba(169,185,140,.35); color:var(--sage-leaf);
@@ -147,6 +151,7 @@
     .btn-icon{width:30px; height:30px; border-radius:999px; background:transparent;
       border:1.5px solid rgba(198,161,76,.45); color:var(--gold); display:grid; place-items:center; cursor:pointer}
     .btn-icon svg{width:16px; height:16px}
+    .btn-icon.is-on{color:var(--ink-on-gold); background:linear-gradient(135deg,var(--gold),var(--gold-2)); border-color:transparent}
 
     /* meals-tab thumbs */
     .thumbs{margin-left:auto; display:flex; gap:6px}
@@ -191,7 +196,7 @@
       <div id="plan-banner"></div>
       <div class="action-row">
         <button class="btn-primary" id="btn-generate">Generate week</button>
-        <button class="btn-soft" id="btn-reroll" hidden>Reshuffle week</button>
+        <button class="btn-icon btn-lock" id="btn-lock" aria-pressed="false" aria-label="Lock week" hidden></button>
       </div>
       <div id="week-strip"></div>
       <div class="cards" id="plan-cards"></div>

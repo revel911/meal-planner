@@ -89,9 +89,11 @@ function renderBanner() {
 
 function renderPlan() {
   const offset = state.weekOffset;
-  const readOnly = offset > 0;
   const plan = viewedPlan();
   const dates = viewedDates();
+  // A locked current week is frozen: no Generate, no per-day swap/pick.
+  const locked = offset === 0 && !!plan?.locked;
+  const readOnly = offset > 0 || locked;
 
   // Week-nav header.
   $('#week-rel').textContent = relativeLabel(offset);
@@ -99,24 +101,37 @@ function renderPlan() {
   $('#btn-week-back').disabled = offset >= state.history.length;
   $('#btn-week-fwd').disabled = offset === 0;
 
-  // Relaxation banner only on the current (editable) week.
-  if (readOnly) $('#plan-banner').innerHTML = ''; else renderBanner();
+  // Relaxation banner only on the current week (stays visible even when locked).
+  if (offset > 0) $('#plan-banner').innerHTML = ''; else renderBanner();
 
   const cards = $('#plan-cards');
   if (!plan || plan.days.length === 0) {
     cards.innerHTML = `<p class="empty">Tap "Generate week" to plan your dinners.</p>`;
     $('#week-strip').innerHTML = '';
     $('#btn-generate').hidden = false;
-    $('#btn-reroll').hidden = true;
+    $('#btn-generate').disabled = false;
+    $('#btn-lock').hidden = true;
     $('#healthy-meter').textContent = '';
     return;
   }
   cards.innerHTML = plan.days.map((d, i) => dayCardHTML(d, i, { readOnly })).join('');
   const tIdx = offset === 0 ? todayIndex(dates) : -1;
   $('#week-strip').innerHTML = weekStripHTML(plan, { dayNums: dates.map((d) => d.getDate()), todayIndex: tIdx });
-  $('#btn-generate').hidden = readOnly;
-  $('#btn-reroll').hidden = readOnly;
+  // Generate stays visible on the current week but is disabled while locked.
+  $('#btn-generate').hidden = offset > 0;
+  $('#btn-generate').disabled = locked;
+  renderLockButton(offset, locked);
   $('#healthy-meter').textContent = `Healthy: ${countHealthy(plan)}/${RULE_DEFAULTS.healthyTarget}`;
+}
+
+// Lock toggle is only on the current week; reflects state in icon + a11y attrs.
+function renderLockButton(offset, locked) {
+  const btn = $('#btn-lock');
+  btn.hidden = offset > 0;
+  btn.innerHTML = ICONS.lock;
+  btn.classList.toggle('is-on', locked);
+  btn.setAttribute('aria-pressed', String(locked));
+  btn.setAttribute('aria-label', locked ? 'Unlock week' : 'Lock week');
 }
 
 function renderShopping() {
@@ -218,10 +233,9 @@ function wireEvents() {
   document.querySelectorAll('.tab').forEach((t) =>
     t.addEventListener('click', () => showScreen(t.dataset.screen)));
   $('#btn-generate').addEventListener('click', onGenerate);
-  $('#btn-reroll').addEventListener('click', () => {
-    state.weekOffset = 0;
-    const current = state.plan.days.map((d) => d.meal.meal);
-    state.plan = generateWeek(state.meals, [current, ...state.history], { ratings: state.ratings });
+  $('#btn-lock').addEventListener('click', () => {
+    if (!state.plan || state.weekOffset !== 0) return;
+    state.plan.locked = !state.plan.locked;
     savePlan(); renderPlan();
   });
   $('#btn-week-back').addEventListener('click', () => {

@@ -41,8 +41,13 @@ project aims to follow [Semantic Versioning](https://semver.org/).
   previous single-week memory.
 - **Home / eat-out badge** on day cards — a house icon for cook-at-home, gold utensils for
   eat-out — replacing the earlier pot/star badge.
+- **Week lock:** a lock-icon button in the Plan action row freezes the current week — Generate
+  is disabled and the per-day swap/pick icons are hidden — until you tap it again to unlock.
+  The locked state is saved with the plan, so it persists across reloads and syncs.
 
 ### Changed
+- **Smaller Plan action-row buttons:** "Generate week" and the new lock button are now compact
+  (~36px tall) instead of full-height.
 - **Compact Plan layout for phones:** the day cards are now two-row (badge + inline day/meal +
   shuffle/pick icons, then a pill row), roughly half their old height; and the top header is
   slimmed — the kicker and the "Monday–Sunday dinners" subtitle are gone, "This Week" is smaller,
@@ -74,6 +79,8 @@ project aims to follow [Semantic Versioning](https://semver.org/).
   field. The `deals.js` module, its fetch, and the `DEALS_CSV_URL` config are gone.
 - The per-day **lock** button and the inline override `<select>` dropdown — superseded by the
   picker sheet and per-day shuffle.
+- **"Reshuffle week" button** — replaced by the week lock control. Per-day shuffle (⟳) and a
+  fresh "Generate week" still cover re-rolling.
 
 ## [0.1.0] — 2026-05-29
 
