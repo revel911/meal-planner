@@ -3,7 +3,7 @@ import { fetchMeals } from './sheet.js';
 import { createStore, localStorageBackend } from './store.js';
 import { generateWeek, rerollDay, countHealthy } from './generator.js';
 import { buildShoppingList } from './shopping.js';
-import { dayCardHTML, shoppingRowHTML, mealRowHTML, evaluateOverride, pickerSheetHTML } from './render.js';
+import { dayCardHTML, shoppingRowHTML, mealRowHTML, evaluateOverride, pickerSheetHTML, weekStripHTML } from './render.js';
 import { RULE_DEFAULTS, FIREBASE_CONFIG, FIREBASE_SCOPE } from './config.js';
 
 const state = { meals: [], plan: null, ratings: {}, history: [], error: null };
@@ -28,7 +28,7 @@ const store = createStore(backend);
 const $ = (sel) => document.querySelector(sel);
 
 const RELAX_TEXT = {
-  healthy: 'healthy target', category: 'no-repeat-category', eatout: 'eat-out limit',
+  healthy: 'healthy target', adjacent: 'back-to-back spacing', eatout: 'bought limit',
   repeat: 'no-repeat-from-last-week', insufficient: 'too few meals',
 };
 
@@ -65,11 +65,13 @@ function renderPlan() {
   const cards = $('#plan-cards');
   if (!state.plan || state.plan.days.length === 0) {
     cards.innerHTML = `<p class="empty">Tap "Generate week" to plan your dinners.</p>`;
+    document.querySelector('#week-strip').innerHTML = '';
     $('#btn-reroll').hidden = true;
     $('#healthy-meter').textContent = '';
     return;
   }
   cards.innerHTML = state.plan.days.map((d, i) => dayCardHTML(d, i)).join('');
+  document.querySelector('#week-strip').innerHTML = weekStripHTML(state.plan);
   $('#btn-reroll').hidden = false;
   const target = RULE_DEFAULTS.healthyTarget;
   $('#healthy-meter').textContent = `Healthy: ${countHealthy(state.plan)}/${target}`;
@@ -194,6 +196,26 @@ function wireEvents() {
     renderMeals();
   });
   $('#shopping-list').addEventListener('change', onCheck);
+  $('#week-strip').addEventListener('click', (e) => {
+    const chip = e.target.closest('[data-action="goto-day"]');
+    if (!chip) return;
+    const card = document.querySelector(`.card[data-day="${chip.dataset.day}"]`);
+    if (!card) return;
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.classList.add('is-flash');
+    setTimeout(() => card.classList.remove('is-flash'), 1200);
+  });
+  $('#btn-reload-meals').addEventListener('click', async () => {
+    const note = $('#reload-note');
+    note.textContent = 'Reloading…';
+    try {
+      state.meals = await fetchMeals();
+      renderMeals();
+      note.textContent = `Loaded ${state.meals.length} meals.`;
+    } catch {
+      note.textContent = 'Could not reach the Sheet.';
+    }
+  });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !$('#picker-host').hidden) closePicker();
   });

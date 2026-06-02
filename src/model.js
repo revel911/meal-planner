@@ -2,12 +2,23 @@
 // and every other row is one attribute ("Type", val1, val2, ...). Rows are
 // keyed by their first cell (the attribute label) so row order doesn't matter.
 
+import { DAYS } from './config.js';
+
 function normalizeWhere(raw) {
   const v = raw.trim().toLowerCase();
   if (v === 'homemade' || v === 'home') return 'Home';
   if (v === 'bought' || v === 'eat out' || v === 'eatout') return 'Eat Out';
   if (v === 'either') return 'Either';
   return 'Either'; // sensible default for blank/unknown
+}
+
+// Parse a Special/Sale cell into a weekday index (0=Mon..6=Sun), or null.
+// Tolerates a trailing "s" ("Tuesdays") and any case.
+function parseDealDay(special) {
+  const v = special.trim().toLowerCase();
+  if (!v) return null;
+  const i = DAYS.findIndex((d) => v.startsWith(d.toLowerCase()));
+  return i === -1 ? null : i;
 }
 
 export function parseMeals(rows) {
@@ -39,6 +50,7 @@ export function parseMeals(rows) {
       speed: cell('speed', col),                 // display only
       cost: cell('cost', col),                   // display only
       special: cell('special / sale', col),      // display only
+      dealDay: parseDealDay(cell('special / sale', col)),
       ingredients: cell('ingredients', col)
         .split(',')
         .map((s) => s.trim())

@@ -68,6 +68,7 @@
     .badge svg{width:20px; height:20px}
     .badge-cook{border:1.5px solid rgba(198,161,76,.55); color:var(--gold)}
     .badge-eatout{background:linear-gradient(135deg,var(--gold),var(--gold-2)); color:var(--ink-on-gold)}
+    .badge-either{border:1.5px solid rgba(169,185,140,.55); color:var(--sage-leaf)}
     .day-label{margin:0 0 4px 46px; font-size:.56rem; font-weight:600; letter-spacing:.14em;
       text-transform:uppercase; color:var(--cream-muted)}
     .card.eatout .day-label{color:var(--gold-hi)}
@@ -75,6 +76,16 @@
     .pill-row{display:flex; flex-wrap:wrap; align-items:center; gap:6px}
 
     /* pills */
+    .week-strip{display:flex; gap:6px; overflow-x:auto; padding:2px 0 12px; -webkit-overflow-scrolling:touch}
+    .ws-chip{flex:0 0 auto; min-width:74px; display:flex; flex-direction:column; gap:2px; align-items:flex-start;
+      background:var(--surface); border:1px solid var(--surface-line); border-radius:12px; padding:6px 9px;
+      color:var(--cream); text-align:left; cursor:pointer; font-family:var(--sans)}
+    .ws-day{font-size:.54rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--gold-hi)}
+    .ws-meal{font-size:.72rem; font-weight:600; color:var(--cream); white-space:nowrap}
+    .ws-cat{font-size:.54rem; color:var(--cream-muted); text-transform:uppercase; letter-spacing:.08em}
+    .card.is-flash{outline:2px solid var(--gold); outline-offset:2px}
+    .reload-note{font-size:.7rem; color:var(--cream-muted); font-weight:600}
+
     .pill{display:inline-flex; align-items:center; gap:4px; border-radius:999px; padding:3px 9px;
       font-size:.6rem; font-weight:600; line-height:1.4}
     .pill svg{width:14px; height:14px}
@@ -164,6 +175,7 @@
         <button class="btn-soft" id="btn-reroll" hidden>Reshuffle week</button>
         <span class="healthy-meter" id="healthy-meter"></span>
       </div>
+      <div id="week-strip"></div>
       <div class="cards" id="plan-cards"></div>
     </section>
 
@@ -178,6 +190,10 @@
     <section id="screen-meals" class="screen" hidden>
       <h1 class="screen-title">Meals</h1>
       <p class="sub">From the shared Google Sheet (read-only)</p>
+      <div class="action-row">
+        <button class="btn-soft" id="btn-reload-meals">Reload from Sheet</button>
+        <span class="reload-note" id="reload-note"></span>
+      </div>
       <div id="meals-list"></div>
     </section>
     <div id="picker-host" hidden></div>

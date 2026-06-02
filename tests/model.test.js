@@ -27,6 +27,7 @@ test('parseMeals reads one meal per column and skips blank names', () => {
     speed: 'Quick',
     cost: '$',
     special: '',
+    dealDay: null,
     ingredients: ['spaghetti', 'meatballs', 'tomato sauce'],
   });
 });
@@ -73,4 +74,17 @@ test('parseMeals returns [] for too-few rows or a missing Dinner row', () => {
   assert.deepEqual(parseMeals([]), []);
   assert.deepEqual(parseMeals([['Dinner', 'X']]), []);          // < 2 rows
   assert.deepEqual(parseMeals([['Type', 'Italian'], ['Cost', '$']]), []); // no Dinner row
+});
+
+test('parseMeals derives dealDay from Special/Sale weekday text', () => {
+  const rows = [
+    ['Dinner', 'Tacos', 'Empanadas', 'Spaghetti', 'Sushi'],
+    ['Special / Sale', 'Tuesdays', 'Wednesday', '', 'BOGO'],
+  ];
+  const meals = parseMeals(rows);
+  assert.equal(meals[0].dealDay, 1); // Tuesday
+  assert.equal(meals[1].dealDay, 2); // Wednesday
+  assert.equal(meals[2].dealDay, null); // blank
+  assert.equal(meals[3].dealDay, null); // non-weekday text
+  assert.equal(meals[0].special, 'Tuesdays');
 });
