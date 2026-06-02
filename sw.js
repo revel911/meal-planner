@@ -1,8 +1,8 @@
-const CACHE = 'dinner-v6';
+const CACHE = 'dinner-v7';
 const SHELL = [
   '.', 'index.html', 'manifest.webmanifest',
   'src/app.js', 'src/config.js', 'src/csv.js', 'src/model.js', 'src/generator.js',
-  'src/shopping.js', 'src/store.js', 'src/sheet.js', 'src/render.js', 'src/icons.js',
+  'src/dates.js', 'src/shopping.js', 'src/store.js', 'src/sheet.js', 'src/render.js', 'src/icons.js',
   'fonts/inter-400.woff2', 'fonts/inter-500.woff2', 'fonts/inter-600.woff2', 'fonts/inter-700.woff2',
   'fonts/playfair-700.woff2', 'fonts/playfair-700italic.woff2',
 ];

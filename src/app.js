@@ -4,9 +4,10 @@ import { createStore, localStorageBackend } from './store.js';
 import { generateWeek, rerollDay, countHealthy } from './generator.js';
 import { buildShoppingList } from './shopping.js';
 import { dayCardHTML, shoppingRowHTML, mealRowHTML, evaluateOverride, pickerSheetHTML, weekStripHTML } from './render.js';
-import { RULE_DEFAULTS, FIREBASE_CONFIG, FIREBASE_SCOPE } from './config.js';
+import { RULE_DEFAULTS, FIREBASE_CONFIG, FIREBASE_SCOPE, DAYS } from './config.js';
+import { mondayOf, addDays, weekDates, formatRange, todayIndex, relativeLabel } from './dates.js';
 
-const state = { meals: [], plan: null, ratings: {}, history: [], error: null };
+const state = { meals: [], plan: null, ratings: {}, history: [], error: null, weekOffset: 0 };
 
 let backend = localStorageBackend;
 if (FIREBASE_CONFIG && FIREBASE_CONFIG.databaseURL) {
@@ -31,6 +32,32 @@ const RELAX_TEXT = {
   healthy: 'healthy target', adjacent: 'back-to-back spacing', eatout: 'bought limit',
   repeat: 'no-repeat-from-last-week', insufficient: 'too few meals',
 };
+
+const modeOf = (meal) => (meal.where === 'Eat Out' ? 'eatout' : 'cook');
+
+// Reconstruct a read-only plan from a stored week of meal names (history entry).
+function lookupMeal(name) {
+  return state.meals.find((m) => m.meal === name)
+    || { meal: name, category: '', where: '', healthy: false, speed: '', cost: '', special: '', ingredients: [] };
+}
+function planFromNames(names) {
+  const days = names.map((n, i) => {
+    const meal = lookupMeal(n);
+    return { day: DAYS[i], meal, mode: modeOf(meal), locked: false };
+  });
+  const plan = { days, relaxations: [], healthyCount: 0 };
+  plan.healthyCount = countHealthy(plan);
+  return plan;
+}
+// The plan + dates for the week currently being viewed (offset 0 = current).
+function viewedPlan() {
+  if (state.weekOffset === 0) return state.plan;
+  const names = state.history[state.weekOffset - 1];
+  return names ? planFromNames(names) : null;
+}
+function viewedDates() {
+  return weekDates(addDays(mondayOf(new Date()), -7 * state.weekOffset));
+}
 
 function paintTabIcons() {
   $('#tab-plan').innerHTML = `${ICONS.calendar}<span>Plan</span>`;
@@ -61,20 +88,35 @@ function renderBanner() {
 }
 
 function renderPlan() {
-  renderBanner();
+  const offset = state.weekOffset;
+  const readOnly = offset > 0;
+  const plan = viewedPlan();
+  const dates = viewedDates();
+
+  // Week-nav header.
+  $('#week-rel').textContent = relativeLabel(offset);
+  $('#week-range').textContent = formatRange(dates);
+  $('#btn-week-back').disabled = offset >= state.history.length;
+  $('#btn-week-fwd').disabled = offset === 0;
+
+  // Relaxation banner only on the current (editable) week.
+  if (readOnly) $('#plan-banner').innerHTML = ''; else renderBanner();
+
   const cards = $('#plan-cards');
-  if (!state.plan || state.plan.days.length === 0) {
+  if (!plan || plan.days.length === 0) {
     cards.innerHTML = `<p class="empty">Tap "Generate week" to plan your dinners.</p>`;
-    document.querySelector('#week-strip').innerHTML = '';
+    $('#week-strip').innerHTML = '';
+    $('#btn-generate').hidden = false;
     $('#btn-reroll').hidden = true;
     $('#healthy-meter').textContent = '';
     return;
   }
-  cards.innerHTML = state.plan.days.map((d, i) => dayCardHTML(d, i)).join('');
-  document.querySelector('#week-strip').innerHTML = weekStripHTML(state.plan);
-  $('#btn-reroll').hidden = false;
-  const target = RULE_DEFAULTS.healthyTarget;
-  $('#healthy-meter').textContent = `Healthy: ${countHealthy(state.plan)}/${target}`;
+  cards.innerHTML = plan.days.map((d, i) => dayCardHTML(d, i, { readOnly })).join('');
+  const tIdx = offset === 0 ? todayIndex(dates) : -1;
+  $('#week-strip').innerHTML = weekStripHTML(plan, { dayNums: dates.map((d) => d.getDate()), todayIndex: tIdx });
+  $('#btn-generate').hidden = readOnly;
+  $('#btn-reroll').hidden = readOnly;
+  $('#healthy-meter').textContent = `Healthy: ${countHealthy(plan)}/${RULE_DEFAULTS.healthyTarget}`;
 }
 
 function renderShopping() {
@@ -105,6 +147,7 @@ async function savePlan() {
 }
 
 async function onGenerate() {
+  state.weekOffset = 0; // generating always returns to the current week
   // Avoid the week currently on screen (treat it as the most-recent history entry)
   // plus the stored older weeks; bias by ratings.
   const current = (state.plan && state.plan.days.length)
@@ -118,6 +161,7 @@ async function onGenerate() {
 }
 
 function onCardClick(e) {
+  if (state.weekOffset !== 0) return; // past weeks are read-only
   const btn = e.target.closest('[data-action]');
   if (!btn) return;
   const i = Number(btn.dataset.day);
@@ -175,9 +219,16 @@ function wireEvents() {
     t.addEventListener('click', () => showScreen(t.dataset.screen)));
   $('#btn-generate').addEventListener('click', onGenerate);
   $('#btn-reroll').addEventListener('click', () => {
+    state.weekOffset = 0;
     const current = state.plan.days.map((d) => d.meal.meal);
     state.plan = generateWeek(state.meals, [current, ...state.history], { ratings: state.ratings });
     savePlan(); renderPlan();
+  });
+  $('#btn-week-back').addEventListener('click', () => {
+    if (state.weekOffset < state.history.length) { state.weekOffset++; renderPlan(); }
+  });
+  $('#btn-week-fwd').addEventListener('click', () => {
+    if (state.weekOffset > 0) { state.weekOffset--; renderPlan(); }
   });
   $('#plan-cards').addEventListener('click', onCardClick);
   $('#picker-host').addEventListener('click', (e) => {

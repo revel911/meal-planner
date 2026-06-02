@@ -68,15 +68,24 @@ test('dayCardHTML badge reflects where: home / pot(either) / utensils(bought)', 
   assert.match(dayCardHTML(EATOUT_DAY, 1), /badge-eatout/);
 });
 
-test('weekStripHTML lists every day with a goto-day control', () => {
+test('weekStripHTML shows day + date, marks today, and omits meal names', () => {
   const plan = { days: [COOK_DAY, EATOUT_DAY, EITHER_DAY], relaxations: [], healthyCount: 0 };
-  const html = weekStripHTML(plan);
+  const html = weekStripHTML(plan, { dayNums: [1, 2, 3], todayIndex: 1 });
   assert.match(html, /data-action="goto-day"/);
-  assert.match(html, /data-day="0"/);
   assert.match(html, /data-day="2"/);
-  assert.match(html, /Spaghetti/);
   assert.match(html, /MON/i);
+  assert.match(html, /ws-date">1</);
+  assert.match(html, /is-today/);
+  assert.doesNotMatch(html, /Spaghetti/); // no meal names in the strip anymore
   assert.equal(weekStripHTML({ days: [] }), '');
+});
+
+test('dayCardHTML readOnly drops the per-day action buttons', () => {
+  const ro = dayCardHTML(COOK_DAY, 0, { readOnly: true });
+  assert.doesNotMatch(ro, /card-actions/);
+  assert.doesNotMatch(ro, /data-action="swap"/);
+  assert.match(ro, /Spaghetti/);
+  assert.match(dayCardHTML(COOK_DAY, 0), /card-actions/);
 });
 
 test('evaluateOverride flags back-to-back category and bought overflow', () => {

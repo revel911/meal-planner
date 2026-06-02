@@ -23,8 +23,9 @@ function specialPill(special) {
 // 'N/A' speed means not applicable (e.g. bought meals) -> hide the pill.
 const hasSpeed = (s) => Boolean(s) && s !== 'N/A';
 
-// dayIndex is needed so event handlers in app.js can map clicks back to a day.
-export function dayCardHTML(day, dayIndex) {
+// dayIndex maps clicks back to a day. opts.readOnly drops the per-day actions
+// (used when viewing a past week).
+export function dayCardHTML(day, dayIndex, opts = {}) {
   const m = day.meal;
   const isEat = day.mode === 'eatout';
   const label = `${day.day.toUpperCase()}${isEat ? ' · BOUGHT' : ''}`;
@@ -40,6 +41,12 @@ export function dayCardHTML(day, dayIndex) {
     : isEat
       ? `<span class="badge badge-eatout" aria-hidden="true">${ICONS.utensils}</span>`
       : `<span class="badge badge-cook" aria-hidden="true">${ICONS.home}</span>`;
+  const actions = opts.readOnly ? '' : `
+        <div class="card-actions">
+          <button class="btn-icon" data-action="swap" data-day="${dayIndex}" aria-label="Shuffle ${esc(m.meal)}">${ICONS.refresh}</button>
+          <button class="btn-icon" data-action="pick" data-day="${dayIndex}" aria-label="Pick a meal for ${esc(day.day)}">${ICONS.list}</button>
+        </div>`;
+  const warn = opts.readOnly ? '' : `\n      <p class="override-warn" data-warn="${dayIndex}"></p>`;
   return `
     <article class="card ${isEat ? 'eatout' : 'cook'}" data-day="${dayIndex}">
       <div class="card-head">
@@ -47,26 +54,21 @@ export function dayCardHTML(day, dayIndex) {
         <div class="card-title">
           <span class="day-label">${esc(label)}</span>
           <h3 class="meal-name">${esc(m.meal)}</h3>
-        </div>
-        <div class="card-actions">
-          <button class="btn-icon" data-action="swap" data-day="${dayIndex}" aria-label="Shuffle ${esc(m.meal)}">${ICONS.refresh}</button>
-          <button class="btn-icon" data-action="pick" data-day="${dayIndex}" aria-label="Pick a meal for ${esc(day.day)}">${ICONS.list}</button>
-        </div>
+        </div>${actions}
       </div>
-      <div class="pill-row">${pills}</div>
-      <p class="override-warn" data-warn="${dayIndex}"></p>
+      <div class="pill-row">${pills}</div>${warn}
     </article>`;
 }
 
-// Compact Mon-Sun strip shown above the detail cards. Each chip jumps to its card.
-export function weekStripHTML(plan) {
+// Compact Mon-Sun strip shown above the detail cards: weekday + date number only.
+// opts: { dayNums:number[], todayIndex:number }. Each chip jumps to its card.
+export function weekStripHTML(plan, opts = {}) {
   if (!plan || !plan.days || plan.days.length === 0) return '';
-  const short = (s) => { const t = String(s); return esc(t.length > 11 ? `${t.slice(0, 10)}…` : t); };
+  const { dayNums = [], todayIndex = -1 } = opts;
   const chips = plan.days.map((d, i) => `
-    <button class="ws-chip" data-action="goto-day" data-day="${i}">
+    <button class="ws-chip${i === todayIndex ? ' is-today' : ''}" data-action="goto-day" data-day="${i}">
       <span class="ws-day">${esc(d.day.slice(0, 3))}</span>
-      <span class="ws-meal">${short(d.meal.meal)}</span>
-      <span class="ws-cat">${esc(d.meal.category)}</span>
+      <span class="ws-date">${esc(dayNums[i] != null ? dayNums[i] : '')}</span>
     </button>`).join('');
   return `<div class="week-strip" aria-label="Week overview">${chips}</div>`;
 }
