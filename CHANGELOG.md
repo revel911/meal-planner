@@ -11,6 +11,11 @@ project aims to follow [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Speed & Cost at a glance:** each meal's `Speed` (Quick / Slow) and `Cost` ($–$$$) from
+  the Sheet now show as pills on the day cards and in the Meals list. Display only — they
+  don't influence which meals the generator picks.
+- **Per-meal "Special / Sale" pill** — e.g. *Tuesdays* on Tacos — surfaced on that meal's
+  day card, replacing the old separate Deals tab.
 - **Thumbs up / down per meal** (Meals tab): liked meals become ~2.5× more likely to be
   picked and disliked ones ~¼ as likely — across generate, single-day shuffle, and reshuffle.
   Nothing is ever fully banned. Tap an active thumb to clear it back to neutral. Ratings sync
@@ -23,6 +28,12 @@ project aims to follow [Semantic Versioning](https://semver.org/).
   eat-out — replacing the earlier pot/star badge.
 
 ### Changed
+- **New Sheet, transposed layout:** the app reads the restructured Google Sheet (meals as
+  columns, attributes as rows) at its new id, via a label-keyed parser so row order in the
+  Sheet no longer matters.
+- **"Where" → "Bought / Made"** (values Homemade / Either / Bought). `Bought` is now the
+  eat-out signal: it drives the ≤2-eat-out-per-week cap and keeps those meals off the
+  shopping list. The eat-out day-card label reads **· BOUGHT**.
 - **Day card redesign:** the always-open per-day override dropdown is gone; picking a specific
   meal now happens in a tap-to-open **picker bottom sheet**. Each card has a hairline "Change"
   footer with a shuffle (⟳, random reroll) and a list (☰, pick from all meals) button.
@@ -32,6 +43,8 @@ project aims to follow [Semantic Versioning](https://semver.org/).
   the lowest-priority-first relaxation ladder are unchanged, so no new "not enough meals" cases.
 
 ### Removed
+- **Separate Deals tab and per-day deal pills** — superseded by the per-meal `Special / Sale`
+  field. The `deals.js` module, its fetch, and the `DEALS_CSV_URL` config are gone.
 - The per-day **lock** button and the inline override `<select>` dropdown — superseded by the
   picker sheet and per-day shuffle.
 
