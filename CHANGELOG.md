@@ -11,6 +11,18 @@ project aims to follow [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **No back-to-back categories:** the generator now spaces cuisines so the same category never
+  lands on consecutive nights (replacing the old "no duplicate category all week" rule, which
+  was impossible with only ~5 categories for 7 days and was silently dropped every week).
+- **Deal-day pinning:** a meal whose `Special / Sale` cell names a weekday (e.g. Tacos →
+  *Tuesdays*) is placed on that day when it's in the week. Deals take priority over the
+  back-to-back spacing rule.
+- **Week-at-a-glance strip:** a compact Mon–Sun row above the day cards; tap a day to jump to
+  and highlight its card.
+- **Distinct "Either" badge:** day cards now use three icons — house (Homemade), pot (Either),
+  utensils (Bought) — instead of folding Either into the cook icon.
+- **"Reload from Sheet" button** (Meals tab) — re-pulls meals live so newly added dishes appear
+  without a full app reload.
 - **Speed & Cost at a glance:** each meal's `Speed` (Quick / Slow) and `Cost` ($–$$$) from
   the Sheet now show as pills on the day cards and in the Meals list. Display only — they
   don't influence which meals the generator picks.
@@ -28,6 +40,12 @@ project aims to follow [Semantic Versioning](https://semver.org/).
   eat-out — replacing the earlier pot/star badge.
 
 ### Changed
+- **Generator rewritten** from "pick a valid set of 7 meals" to "fill seven day-slots" so it
+  can enforce back-to-back spacing and deal-day placement. The relaxation ladder now drops
+  `healthy → spacing → bought-cap → repeat`; deal pins are never relaxed.
+- **Override warning is now back-to-back-based** — picking a meal only warns when its category
+  clashes with an *adjacent* night (not anywhere in the week), plus a note if you move a deal
+  meal off its deal day.
 - **New Sheet, transposed layout:** the app reads the restructured Google Sheet (meals as
   columns, attributes as rows) at its new id, via a label-keyed parser so row order in the
   Sheet no longer matters.
