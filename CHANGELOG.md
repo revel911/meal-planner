@@ -11,6 +11,9 @@ project aims to follow [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Week navigation with dates:** the Plan header now shows the week's date range (e.g. *Jun 1 – 7*)
+  with `‹ ›` arrows to page back through the **last 3 weeks** (read-only) and forward to the current
+  week. A relative label reads *This week / Last week / N weeks ago*.
 - **No back-to-back categories:** the generator now spaces cuisines so the same category never
   lands on consecutive nights (replacing the old "no duplicate category all week" rule, which
   was impossible with only ~5 categories for 7 days and was silently dropped every week).
@@ -44,6 +47,8 @@ project aims to follow [Semantic Versioning](https://semver.org/).
   shuffle/pick icons, then a pill row), roughly half their old height; and the top header is
   slimmed — the kicker and the "Monday–Sunday dinners" subtitle are gone, "This Week" is smaller,
   and the Healthy meter sits inline beside it. Much less scrolling per week.
+- **Week strip is now a date strip:** each chip shows the weekday + date number (today highlighted)
+  instead of the meal name and category, so it's much smaller; the meals live in the cards below.
 - **Generator rewritten** from "pick a valid set of 7 meals" to "fill seven day-slots" so it
   can enforce back-to-back spacing and deal-day placement. The relaxation ladder now drops
   `healthy → spacing → bought-cap → repeat`; deal pins are never relaxed.
