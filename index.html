@@ -56,9 +56,15 @@
     .tab[aria-selected="true"]{color:var(--gold)}
     .tab svg{display:block}
 
-    /* slim plan header */
-    .plan-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin:6px 0 8px}
-    .plan-title{font-size:1.4rem; margin:0}
+    /* slim plan header + week nav */
+    .plan-head{display:flex; align-items:center; justify-content:space-between; gap:12px; margin:6px 0 8px}
+    .week-nav{display:flex; align-items:center; gap:8px}
+    .nav-arrow{width:30px; height:30px; border-radius:999px; border:1.5px solid rgba(198,161,76,.45);
+      background:transparent; color:var(--gold); font-size:1.1rem; line-height:1; cursor:pointer; display:grid; place-items:center}
+    .nav-arrow:disabled{opacity:.3; cursor:default}
+    .week-when{display:flex; flex-direction:column; line-height:1.15}
+    .week-rel{font-family:var(--serif); font-size:1.2rem; font-weight:700; color:var(--cream)}
+    .week-range{font-size:.56rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--cream-muted)}
 
     /* day cards (compact) */
     .cards{display:grid; gap:8px}
@@ -83,13 +89,14 @@
     .pill-row{display:flex; flex-wrap:wrap; align-items:center; gap:6px}
 
     /* pills */
-    .week-strip{display:flex; gap:6px; overflow-x:auto; padding:2px 0 12px; -webkit-overflow-scrolling:touch}
-    .ws-chip{flex:0 0 auto; min-width:74px; display:flex; flex-direction:column; gap:2px; align-items:flex-start;
-      background:var(--surface); border:1px solid var(--surface-line); border-radius:12px; padding:6px 9px;
-      color:var(--cream); text-align:left; cursor:pointer; font-family:var(--sans)}
-    .ws-day{font-size:.54rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--gold-hi)}
-    .ws-meal{font-size:.72rem; font-weight:600; color:var(--cream); white-space:nowrap}
-    .ws-cat{font-size:.54rem; color:var(--cream-muted); text-transform:uppercase; letter-spacing:.08em}
+    .week-strip{display:flex; gap:6px; padding:2px 0 12px}
+    .ws-chip{flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap:1px; align-items:center;
+      background:var(--surface); border:1px solid var(--surface-line); border-radius:10px; padding:5px 4px;
+      color:var(--cream); cursor:pointer; font-family:var(--sans)}
+    .ws-chip.is-today{border-color:var(--gold); background:var(--gold-soft)}
+    .ws-day{font-size:.5rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--cream-muted)}
+    .ws-date{font-size:.85rem; font-weight:700; color:var(--cream)}
+    .ws-chip.is-today .ws-day, .ws-chip.is-today .ws-date{color:var(--gold-hi)}
     .card.is-flash{outline:2px solid var(--gold); outline-offset:2px}
     .reload-note{font-size:.7rem; color:var(--cream-muted); font-weight:600}
 
@@ -171,7 +178,14 @@
     <!-- PLAN -->
     <section id="screen-plan" class="screen">
       <div class="plan-head">
-        <h1 class="screen-title plan-title">This <em>Week</em></h1>
+        <div class="week-nav">
+          <button class="nav-arrow" id="btn-week-back" aria-label="Older week">‹</button>
+          <div class="week-when">
+            <span class="week-rel" id="week-rel">This week</span>
+            <span class="week-range" id="week-range"></span>
+          </div>
+          <button class="nav-arrow" id="btn-week-fwd" aria-label="Newer week">›</button>
+        </div>
         <span class="healthy-meter" id="healthy-meter"></span>
       </div>
       <div id="plan-banner"></div>
