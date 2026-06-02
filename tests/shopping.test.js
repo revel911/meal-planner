@@ -40,3 +40,17 @@ test('marks staples', () => {
   assert.equal(all.find((i) => i.key === 'garlic').staple, true);
   assert.equal(all.find((i) => i.key === 'onion').staple, false);
 });
+
+test('Bought (eat-out) meals never contribute to the list, even with ingredients', () => {
+  const plan = {
+    days: [
+      { day: 'Monday', mode: 'cook', meal: { meal: 'Spaghetti', ingredients: ['ground beef'] } },
+      { day: 'Tuesday', mode: 'eatout', meal: { meal: 'Empanadas', ingredients: ['dough', 'onion'] } },
+    ],
+    relaxations: [], healthyCount: 0,
+  };
+  const all = buildShoppingList(plan, []).flatMap((g) => g.items);
+  assert.ok(all.some((i) => i.key === 'ground beef')); // cook meal included
+  assert.ok(!all.some((i) => i.key === 'dough'));       // bought meal excluded
+  assert.ok(!all.some((i) => i.key === 'onion'));        // bought meal excluded
+});

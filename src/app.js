@@ -1,13 +1,12 @@
 import { ICONS } from './icons.js';
-import { fetchMeals, fetchDeals } from './sheet.js';
+import { fetchMeals } from './sheet.js';
 import { createStore, localStorageBackend } from './store.js';
 import { generateWeek, rerollDay, countHealthy } from './generator.js';
-import { dealForDay } from './deals.js';
 import { buildShoppingList } from './shopping.js';
 import { dayCardHTML, shoppingRowHTML, mealRowHTML, evaluateOverride, pickerSheetHTML } from './render.js';
 import { RULE_DEFAULTS, FIREBASE_CONFIG, FIREBASE_SCOPE } from './config.js';
 
-const state = { meals: [], deals: [], plan: null, ratings: {}, history: [], error: null };
+const state = { meals: [], plan: null, ratings: {}, history: [], error: null };
 
 let backend = localStorageBackend;
 if (FIREBASE_CONFIG && FIREBASE_CONFIG.databaseURL) {
@@ -70,8 +69,7 @@ function renderPlan() {
     $('#healthy-meter').textContent = '';
     return;
   }
-  cards.innerHTML = state.plan.days.map((d, i) =>
-    dayCardHTML(d, i, d.mode === 'eatout' ? dealForDay(state.deals, d.day) : null)).join('');
+  cards.innerHTML = state.plan.days.map((d, i) => dayCardHTML(d, i)).join('');
   $('#btn-reroll').hidden = false;
   const target = RULE_DEFAULTS.healthyTarget;
   $('#healthy-meter').textContent = `Healthy: ${countHealthy(state.plan)}/${target}`;
@@ -205,7 +203,7 @@ async function init() {
   paintTabIcons();
   wireEvents();
   try {
-    [state.meals, state.deals] = await Promise.all([fetchMeals(), fetchDeals()]);
+    state.meals = await fetchMeals();
   } catch (err) {
     state.error = 'Could not reach the Google Sheet. Showing the last saved plan if available.';
   }

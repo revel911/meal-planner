@@ -1,11 +1,8 @@
 // Single source of app-wide constants. No logic here.
-export const SHEET_ID = '1Y2ZhSSoxVelTCsDi_Moo5et0HRlqLvShK242a6sd3i4';
+export const SHEET_ID = '1Y-KHVDtsOtPjscoIv3lz1lzCGf9Lb5eOGv9ajVhq9uM';
 
-// Published-CSV endpoints via the gviz API. The meals tab is the first/default tab.
-// The deals tab is referenced by name; if it does not resolve, gviz falls back to the
-// first tab, so fetchDeals() guards against that (see sheet.js).
+// Published-CSV endpoint via the gviz API (first/default tab).
 export const MEALS_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
-export const DEALS_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Deals`;
 
 export const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 

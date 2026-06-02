@@ -62,27 +62,20 @@ Google Sheet (published CSV)
 
 ## The data model (the Google Sheet)
 
-The Sheet has two tabs. The app only ever **reads** them.
+The Sheet is a single tab, laid out **transposed**: the first row is the meal names
+(`Dinner | Spaghetti | Tacos | …`) and each row beneath it is one attribute. The app only
+ever **reads** it, and row order doesn't matter — rows are matched by their label.
 
-**Meals**
-
-| Column | Meaning |
+| Row (attribute) | Meaning |
 | :-- | :-- |
-| Meal | Dish name (e.g. *Sheet Pan Salmon*) |
-| Category | Cuisine/type (Italian, Mexican, American…) — used for the no-duplicate rule |
-| Ingredients | Comma-separated; feeds the shopping list |
-| Where | `Home` (must cook) · `Either` (cook or eat out) · `Eat Out` (must eat out) |
-| Healthy | `Yes` / `No` — feeds the healthy target + 💚 badge |
-| Notes | Free text (optional) |
-
-**Restaurant deals by day**
-
-| Column | Meaning |
-| :-- | :-- |
-| Day | Monday–Sunday |
-| Restaurant | Where the deal is |
-| Deal | The offer (e.g. *Taco Tuesday*) |
-| Notes | Free text (optional) |
+| Dinner | The meal name — one per column |
+| Type | Cuisine/type (Italian, Mexican, American…) — used for the no-duplicate rule |
+| Bought / Made | `Homemade` · `Either` · `Bought`. `Bought` is the eat-out signal: capped at ≤2/week and kept off the shopping list |
+| Special / Sale | Free text (e.g. *Tuesdays*) — shown as a pill on that meal's day card |
+| Speed | `Quick` / `Slow` / `N/A` — shown as a pill (display only) |
+| Cost | `$` / `$$` / `$$$` — shown as a pill (display only) |
+| Healthy | `Yes` / `No` — feeds the healthy target + badge |
+| Ingredients | Comma-separated; feeds the shopping list (skipped for `Bought` meals) |
 
 To add or change a meal, edit the Sheet — the app reflects it on the next load.
 
@@ -116,9 +109,8 @@ The meals load live from the published Sheet on first paint.
 
 1. **Publish the Sheet** (already done): in Google Sheets → *File → Share → Publish to
    web* (read-only). The app reads it as CSV via the gviz endpoint configured in
-   [`src/config.js`](src/config.js) (`SHEET_ID`). Add a **Deals** tab (columns: Day,
-   Restaurant, Deal, Notes) whenever you want eat-out deal suggestions — until then the
-   app just shows "Eat out" with no pill.
+   [`src/config.js`](src/config.js) (`SHEET_ID`). Use the per-meal **Special / Sale** row
+   for any standing deal note (e.g. *Tuesdays*) — it shows as a pill on that meal's card.
 2. **Cross-device sync (optional):** sync runs on Firebase Realtime Database. The config
    lives in [`src/config.js`](src/config.js) as `FIREBASE_CONFIG`, path-scoped under
    `FIREBASE_SCOPE` (`dinner/home`) so it shares the health-tracker project without

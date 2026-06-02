@@ -4,9 +4,9 @@ import { ICONS } from '../src/icons.js';
 import { dayCardHTML, shoppingRowHTML, mealRowHTML, evaluateOverride, pickerSheetHTML } from '../src/render.js';
 
 const COOK_DAY = { day: 'Monday', mode: 'cook', locked: false,
-  meal: { meal: 'Spaghetti', category: 'Italian', healthy: true } };
+  meal: { meal: 'Spaghetti', category: 'Italian', healthy: true, speed: 'Quick', cost: '$', special: '' } };
 const EATOUT_DAY = { day: 'Tuesday', mode: 'eatout', locked: false,
-  meal: { meal: 'Sushi', category: 'Japanese', healthy: false } };
+  meal: { meal: 'Sushi', category: 'Asian', healthy: false, speed: 'N/A', cost: '$$$', special: 'Tuesdays' } };
 
 test('every core icon exists and is an svg using currentColor', () => {
   for (const name of ['calendar', 'bag', 'utensils', 'refresh', 'leaf', 'tag', 'home', 'list', 'thumbUp', 'thumbDown']) {
@@ -16,26 +16,31 @@ test('every core icon exists and is an svg using currentColor', () => {
   }
 });
 
-test('dayCardHTML renders meal, category pill and day label', () => {
-  const html = dayCardHTML(COOK_DAY, 0, null);
+test('dayCardHTML renders meal, category/speed/cost pills and day label', () => {
+  const html = dayCardHTML(COOK_DAY, 0);
   assert.match(html, /Spaghetti/);
   assert.match(html, /Italian/);
   assert.match(html, /MONDAY/);
+  assert.match(html, /pill-speed[^>]*>Quick/);
+  assert.match(html, /pill-cost[^>]*>\$/);
   assert.match(html, /class="card cook"/);
   assert.match(html, /badge-cook/);
 });
 
-test('dayCardHTML marks eat-out and renders a deal pill when given a deal', () => {
-  const html = dayCardHTML(EATOUT_DAY, 1, { restaurant: 'Taqueria', deal: 'Taco Tuesday' });
+test('dayCardHTML marks bought day with BOUGHT label and a Special/Sale pill', () => {
+  const html = dayCardHTML(EATOUT_DAY, 1);
   assert.match(html, /class="card eatout"/);
-  assert.match(html, /EAT OUT/);
-  assert.match(html, /Taco Tuesday/);
+  assert.match(html, /BOUGHT/);
+  assert.doesNotMatch(html, /EAT OUT/);
+  assert.match(html, /pill-special[^>]*>[\s\S]*Tuesdays/);
+  assert.match(html, /pill-cost[^>]*>\$\$\$/);
+  assert.doesNotMatch(html, /pill-speed/);
   assert.match(html, /badge-eatout/);
 });
 
 test('dayCardHTML shows a healthy pill only for healthy meals', () => {
-  assert.match(dayCardHTML(COOK_DAY, 0, null), /pill-healthy/);
-  assert.doesNotMatch(dayCardHTML(EATOUT_DAY, 1, null), /pill-healthy/);
+  assert.match(dayCardHTML(COOK_DAY, 0), /pill-healthy/);
+  assert.doesNotMatch(dayCardHTML(EATOUT_DAY, 1), /pill-healthy/);
 });
 
 test('shoppingRowHTML reflects checked + staple state', () => {
@@ -45,11 +50,14 @@ test('shoppingRowHTML reflects checked + staple state', () => {
   assert.match(html, /staple/);
 });
 
-test('mealRowHTML lists name, category and where', () => {
-  const html = mealRowHTML({ meal: 'Tacos', category: 'Mexican', where: 'Either', healthy: false, ingredients: ['pork'] });
+test('mealRowHTML lists name, category, where, speed and cost', () => {
+  const html = mealRowHTML({ meal: 'Tacos', category: 'Mexican', where: 'Either',
+    healthy: false, speed: 'Quick', cost: '$$', special: '', ingredients: ['pork'] });
   assert.match(html, /Tacos/);
   assert.match(html, /Mexican/);
   assert.match(html, /Either/);
+  assert.match(html, /pill-speed[^>]*>Quick/);
+  assert.match(html, /pill-cost[^>]*>\$\$/);
 });
 
 test('evaluateOverride flags a duplicate category and eat-out overflow', () => {
@@ -71,7 +79,7 @@ test('evaluateOverride flags a duplicate category and eat-out overflow', () => {
 });
 
 test('dayCardHTML has Change footer with shuffle + list, and no dropdown or lock', () => {
-  const html = dayCardHTML(COOK_DAY, 0, null);
+  const html = dayCardHTML(COOK_DAY, 0);
   assert.match(html, /data-action="swap"/);
   assert.match(html, /data-action="pick"/);
   assert.doesNotMatch(html, /data-action="lock"/);

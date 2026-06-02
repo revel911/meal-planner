@@ -18,9 +18,10 @@ polish & ship) all landed in **v0.1.0**. See [CHANGELOG.md](CHANGELOG.md) for th
 
 - [ ] **Dedicated staples editor** — staples persist and stay checked today, but marking
       an arbitrary ingredient as a staple is only lightly exposed. Add a clear toggle/affordance.
-- [ ] **Publish the Deals tab** in the Sheet so eat-out nights show restaurant/deal pills
-      (the app already matches and renders them when the tab exists).
 - [ ] **Two-device sync sanity check** on real phones now that Firebase is wired.
+- [ ] **Backfill ingredients in the Sheet** — many meals (Empanadas, Nachos, Fish, Crab
+      Cakes, …) have no ingredients yet, so the shopping list is partial until they're filled
+      in. This is a Sheet edit, not an app change.
 
 ---
 
