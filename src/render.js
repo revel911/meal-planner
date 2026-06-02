@@ -10,18 +10,30 @@ function categoryPill(cat) {
 function healthyPill() {
   return `<span class="pill pill-healthy">${ICONS.leaf}Healthy</span>`;
 }
-function dealPill(deal) {
-  return `<span class="pill pill-deal">${ICONS.tag}${esc(deal.deal || deal.restaurant)}</span>`;
+function speedPill(speed) {
+  return `<span class="pill pill-speed">${esc(speed)}</span>`;
+}
+function costPill(cost) {
+  return `<span class="pill pill-cost">${esc(cost)}</span>`;
+}
+function specialPill(special) {
+  return `<span class="pill pill-special">${ICONS.tag}${esc(special)}</span>`;
 }
 
+// 'N/A' speed means not applicable (e.g. bought meals) -> hide the pill.
+const hasSpeed = (s) => Boolean(s) && s !== 'N/A';
+
 // dayIndex is needed so event handlers in app.js can map clicks back to a day.
-export function dayCardHTML(day, dayIndex, deal) {
+export function dayCardHTML(day, dayIndex) {
+  const m = day.meal;
   const isEat = day.mode === 'eatout';
-  const label = `${day.day.toUpperCase()}${isEat ? ' · EAT OUT' : ''}`;
+  const label = `${day.day.toUpperCase()}${isEat ? ' · BOUGHT' : ''}`;
   const pills = [
-    categoryPill(day.meal.category),
-    day.meal.healthy ? healthyPill() : '',
-    (isEat && deal) ? dealPill(deal) : '',
+    categoryPill(m.category),
+    m.healthy ? healthyPill() : '',
+    hasSpeed(m.speed) ? speedPill(m.speed) : '',
+    m.cost ? costPill(m.cost) : '',
+    m.special ? specialPill(m.special) : '',
   ].join('');
   const badge = isEat
     ? `<span class="badge badge-eatout" aria-hidden="true">${ICONS.utensils}</span>`
@@ -30,11 +42,11 @@ export function dayCardHTML(day, dayIndex, deal) {
     <article class="card ${isEat ? 'eatout' : 'cook'}" data-day="${dayIndex}">
       ${badge}
       <p class="day-label">${esc(label)}</p>
-      <h3 class="meal-name">${esc(day.meal.meal)}</h3>
+      <h3 class="meal-name">${esc(m.meal)}</h3>
       <div class="pill-row">${pills}</div>
       <div class="card-footer">
         <span class="change-label" aria-hidden="true">Change</span>
-        <button class="btn-icon" data-action="swap" data-day="${dayIndex}" aria-label="Shuffle ${esc(day.meal.meal)}">${ICONS.refresh}</button>
+        <button class="btn-icon" data-action="swap" data-day="${dayIndex}" aria-label="Shuffle ${esc(m.meal)}">${ICONS.refresh}</button>
         <button class="btn-icon" data-action="pick" data-day="${dayIndex}" aria-label="Pick a meal for ${esc(day.day)}">${ICONS.list}</button>
       </div>
       <p class="override-warn" data-warn="${dayIndex}"></p>
@@ -61,6 +73,8 @@ export function mealRowHTML(meal, rating) {
         <span class="pill pill-cat">${esc(meal.category)}</span>
         <span class="pill pill-where">${esc(meal.where)}</span>
         ${meal.healthy ? healthyPill() : ''}
+        ${hasSpeed(meal.speed) ? speedPill(meal.speed) : ''}
+        ${meal.cost ? costPill(meal.cost) : ''}
         <span class="thumbs">${thumb('up', ICONS.thumbUp)}${thumb('down', ICONS.thumbDown)}</span>
       </div>
       <p class="meal-ings">${esc(meal.ingredients.join(', '))}</p>
