@@ -1,5 +1,5 @@
 import { ICONS } from './icons.js';
-import { RULE_DEFAULTS } from './config.js';
+import { RULE_DEFAULTS, DAYS } from './config.js';
 
 const esc = (s) => String(s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -35,9 +35,11 @@ export function dayCardHTML(day, dayIndex) {
     m.cost ? costPill(m.cost) : '',
     m.special ? specialPill(m.special) : '',
   ].join('');
-  const badge = isEat
-    ? `<span class="badge badge-eatout" aria-hidden="true">${ICONS.utensils}</span>`
-    : `<span class="badge badge-cook" aria-hidden="true">${ICONS.home}</span>`;
+  const badge = m.where === 'Either'
+    ? `<span class="badge badge-either" aria-hidden="true">${ICONS.pot}</span>`
+    : isEat
+      ? `<span class="badge badge-eatout" aria-hidden="true">${ICONS.utensils}</span>`
+      : `<span class="badge badge-cook" aria-hidden="true">${ICONS.home}</span>`;
   return `
     <article class="card ${isEat ? 'eatout' : 'cook'}" data-day="${dayIndex}">
       ${badge}
@@ -51,6 +53,19 @@ export function dayCardHTML(day, dayIndex) {
       </div>
       <p class="override-warn" data-warn="${dayIndex}"></p>
     </article>`;
+}
+
+// Compact Mon-Sun strip shown above the detail cards. Each chip jumps to its card.
+export function weekStripHTML(plan) {
+  if (!plan || !plan.days || plan.days.length === 0) return '';
+  const short = (s) => { const t = String(s); return esc(t.length > 11 ? `${t.slice(0, 10)}…` : t); };
+  const chips = plan.days.map((d, i) => `
+    <button class="ws-chip" data-action="goto-day" data-day="${i}">
+      <span class="ws-day">${esc(d.day.slice(0, 3))}</span>
+      <span class="ws-meal">${short(d.meal.meal)}</span>
+      <span class="ws-cat">${esc(d.meal.category)}</span>
+    </button>`).join('');
+  return `<div class="week-strip" aria-label="Week overview">${chips}</div>`;
 }
 
 export function shoppingRowHTML(item, checked) {
@@ -83,15 +98,22 @@ export function mealRowHTML(meal, rating) {
 
 // Inline warning string (empty = no warning) for replacing day `dayIndex` with `meal`.
 export function evaluateOverride(plan, dayIndex, meal) {
-  const others = plan.days.filter((_, i) => i !== dayIndex);
-  if (others.some((d) => d.meal.category === meal.category)) {
-    return `Heads up: ${meal.category} is already used this week (duplicate category).`;
+  const prev = plan.days[dayIndex - 1];
+  const next = plan.days[dayIndex + 1];
+  const pinned = meal.dealDay === dayIndex;
+  if (!pinned && ((prev && prev.meal.category === meal.category)
+                  || (next && next.meal.category === meal.category))) {
+    return `Heads up: ${meal.category} is on a back-to-back night.`;
   }
   if (meal.where === 'Eat Out') {
-    const eatOut = others.filter((d) => d.mode === 'eatout').length;
-    if (eatOut + 1 > RULE_DEFAULTS.maxEatOut) {
-      return `Heads up: that's more than ${RULE_DEFAULTS.maxEatOut} eat-out nights.`;
+    const others = plan.days.filter((_, i) => i !== dayIndex);
+    const bought = others.filter((d) => d.mode === 'eatout').length;
+    if (bought + 1 > RULE_DEFAULTS.maxEatOut) {
+      return `Heads up: that's more than ${RULE_DEFAULTS.maxEatOut} bought nights.`;
     }
+  }
+  if (meal.dealDay != null && meal.dealDay !== dayIndex) {
+    return `Note: ${meal.meal} has a ${DAYS[meal.dealDay]} deal.`;
   }
   return '';
 }

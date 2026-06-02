@@ -1,12 +1,14 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { ICONS } from '../src/icons.js';
-import { dayCardHTML, shoppingRowHTML, mealRowHTML, evaluateOverride, pickerSheetHTML } from '../src/render.js';
+import { dayCardHTML, shoppingRowHTML, mealRowHTML, evaluateOverride, pickerSheetHTML, weekStripHTML } from '../src/render.js';
 
 const COOK_DAY = { day: 'Monday', mode: 'cook', locked: false,
-  meal: { meal: 'Spaghetti', category: 'Italian', healthy: true, speed: 'Quick', cost: '$', special: '' } };
+  meal: { meal: 'Spaghetti', category: 'Italian', where: 'Home', healthy: true, speed: 'Quick', cost: '$', special: '' } };
 const EATOUT_DAY = { day: 'Tuesday', mode: 'eatout', locked: false,
-  meal: { meal: 'Sushi', category: 'Asian', healthy: false, speed: 'N/A', cost: '$$$', special: 'Tuesdays' } };
+  meal: { meal: 'Sushi', category: 'Asian', where: 'Eat Out', healthy: false, speed: 'N/A', cost: '$$$', special: 'Tuesdays' } };
+const EITHER_DAY = { day: 'Wednesday', mode: 'cook', locked: false,
+  meal: { meal: 'Burgers', category: 'American', where: 'Either', healthy: false, speed: 'Quick', cost: '$$', special: '' } };
 
 test('every core icon exists and is an svg using currentColor', () => {
   for (const name of ['calendar', 'bag', 'utensils', 'refresh', 'leaf', 'tag', 'home', 'list', 'thumbUp', 'thumbDown']) {
@@ -60,22 +62,32 @@ test('mealRowHTML lists name, category, where, speed and cost', () => {
   assert.match(html, /pill-cost[^>]*>\$\$/);
 });
 
-test('evaluateOverride flags a duplicate category and eat-out overflow', () => {
+test('dayCardHTML badge reflects where: home / pot(either) / utensils(bought)', () => {
+  assert.match(dayCardHTML(COOK_DAY, 0), /badge-cook/);
+  assert.match(dayCardHTML(EITHER_DAY, 2), /badge-either/);
+  assert.match(dayCardHTML(EATOUT_DAY, 1), /badge-eatout/);
+});
+
+test('weekStripHTML lists every day with a goto-day control', () => {
+  const plan = { days: [COOK_DAY, EATOUT_DAY, EITHER_DAY], relaxations: [], healthyCount: 0 };
+  const html = weekStripHTML(plan);
+  assert.match(html, /data-action="goto-day"/);
+  assert.match(html, /data-day="0"/);
+  assert.match(html, /data-day="2"/);
+  assert.match(html, /Spaghetti/);
+  assert.match(html, /MON/i);
+  assert.equal(weekStripHTML({ days: [] }), '');
+});
+
+test('evaluateOverride flags back-to-back category and bought overflow', () => {
   const plan = { days: [
-    { day: 'Monday', mode: 'cook', meal: { meal: 'A', category: 'Italian', where: 'Home', healthy: false, ingredients: [] } },
-    { day: 'Tuesday', mode: 'eatout', meal: { meal: 'B', category: 'Japanese', where: 'Eat Out', healthy: false, ingredients: [] } },
-    { day: 'Wednesday', mode: 'eatout', meal: { meal: 'C', category: 'Mexican', where: 'Eat Out', healthy: false, ingredients: [] } },
+    { day: 'Monday', mode: 'cook', meal: { meal: 'A', category: 'Italian', where: 'Home' } },
+    { day: 'Tuesday', mode: 'eatout', meal: { meal: 'B', category: 'Asian', where: 'Eat Out' } },
+    { day: 'Wednesday', mode: 'eatout', meal: { meal: 'C', category: 'Mexican', where: 'Eat Out' } },
   ], relaxations: [], healthyCount: 0 };
-  // Overriding Monday with a Japanese meal -> clashes with Tuesday's category.
-  const dup = evaluateOverride(plan, 0, { meal: 'D', category: 'Japanese', where: 'Home' });
-  assert.match(dup, /category/i);
-  // Overriding Monday with a 3rd eat-out -> exceeds cap of 2.
-  const over = evaluateOverride(plan, 0, { meal: 'E', category: 'Greek', where: 'Eat Out' });
-  assert.match(over, /eat-out/i);
-  // A clean pick (category not used on any OTHER day) -> empty string.
+  assert.match(evaluateOverride(plan, 0, { meal: 'D', category: 'Asian', where: 'Home' }), /back-to-back|adjacent/i);
+  assert.match(evaluateOverride(plan, 0, { meal: 'E', category: 'Greek', where: 'Eat Out' }), /bought/i);
   assert.equal(evaluateOverride(plan, 0, { meal: 'F', category: 'Greek', where: 'Home' }), '');
-  // Replacing Monday's Italian with a different Italian is NOT a duplicate (same slot).
-  assert.equal(evaluateOverride(plan, 0, { meal: 'G', category: 'Italian', where: 'Home' }), '');
 });
 
 test('dayCardHTML has Change footer with shuffle + list, and no dropdown or lock', () => {
