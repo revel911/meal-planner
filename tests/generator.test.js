@@ -98,6 +98,15 @@ test('rerollDay swaps one day for an eligible different meal, keeping others', (
   assert.equal(next.days[0].meal.meal, plan.days[0].meal.meal);
 });
 
+test('rerollDay never duplicates an existing meal even in a tight pool', () => {
+  // 7 meals for 7 days -> all used. No distinct replacement exists, so the day
+  // must stay unchanged rather than duplicate another day's meal.
+  const seven = MEALS.slice(0, 7);
+  const plan = generateWeek(seven, [], { rng: noShuffle, healthyTarget: 0 });
+  const next = rerollDay(plan, 3, seven, { rng: () => 0.5 });
+  assert.equal(new Set(next.days.map((d) => d.meal.meal)).size, 7, 'still 7 distinct meals');
+});
+
 test('ratingWeight boosts up, penalizes down, neutral is 1', () => {
   assert.equal(ratingWeight('Tacos', { Tacos: 'up' }), 2.5);
   assert.equal(ratingWeight('Tacos', { Tacos: 'down' }), 0.25);

@@ -137,7 +137,11 @@ export function rerollDay(plan, dayIndex, meals, opts = {}) {
     return true;
   });
 
-  const pick = candidates[0] || meals.find((m) => m.meal !== current) || plan.days[dayIndex].meal;
+  // Fallbacks: prefer a fully-eligible candidate; else any distinct unused meal
+  // (relaxes only adjacency/cap, never duplicates); else leave the day unchanged.
+  const pick = candidates[0]
+    || meals.find((m) => m.meal !== current && !otherNames.includes(m.meal))
+    || plan.days[dayIndex].meal;
   const days = plan.days.map((d, i) => i === dayIndex
     ? { ...d, meal: pick, mode: modeFor(pick) }
     : d);
