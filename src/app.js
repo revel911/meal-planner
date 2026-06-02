@@ -28,7 +28,7 @@ const store = createStore(backend);
 const $ = (sel) => document.querySelector(sel);
 
 const RELAX_TEXT = {
-  healthy: 'healthy target', category: 'no-repeat-category', eatout: 'eat-out limit',
+  healthy: 'healthy target', adjacent: 'back-to-back spacing', eatout: 'bought limit',
   repeat: 'no-repeat-from-last-week', insufficient: 'too few meals',
 };
 
