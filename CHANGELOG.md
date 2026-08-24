@@ -10,6 +10,11 @@ project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- **Sunday planning rollover:** Sunday now targets the week beginning the next day, labels it
+  *Next week*, and allows a fresh plan even when the ending week was locked. Plans are saved with
+  their Monday start date so an older plan is no longer shown under a new week's dates.
+
 ### Added
 - **Week navigation with dates:** the Plan header now shows the week's date range (e.g. *Jun 1 – 7*)
   with `‹ ›` arrows to page back through the **last 3 weeks** (read-only) and forward to the current

@@ -1,4 +1,4 @@
-const CACHE = 'dinner-v8';
+const CACHE = 'dinner-v9';
 const SHELL = [
   '.', 'index.html', 'manifest.webmanifest',
   'src/app.js', 'src/config.js', 'src/csv.js', 'src/model.js', 'src/generator.js',

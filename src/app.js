@@ -5,7 +5,10 @@ import { generateWeek, rerollDay, countHealthy } from './generator.js';
 import { buildShoppingList } from './shopping.js';
 import { dayCardHTML, shoppingRowHTML, mealRowHTML, evaluateOverride, pickerSheetHTML, weekStripHTML } from './render.js';
 import { RULE_DEFAULTS, FIREBASE_CONFIG, FIREBASE_SCOPE, DAYS } from './config.js';
-import { mondayOf, addDays, weekDates, formatRange, todayIndex, relativeLabel } from './dates.js';
+import {
+  planningMonday, dateKey, dateFromKey, weeksBetween,
+  addDays, weekDates, formatRange, todayIndex, relativeLabel,
+} from './dates.js';
 
 const state = { meals: [], plan: null, ratings: {}, history: [], error: null, weekOffset: 0 };
 
@@ -49,14 +52,29 @@ function planFromNames(names) {
   plan.healthyCount = countHealthy(plan);
   return plan;
 }
-// The plan + dates for the week currently being viewed (offset 0 = current).
+// The stored plan's position relative to the planning week. Legacy undated plans
+// count as the ending week on Sunday and the current week on every other day.
+function storedPlanOffset(today = new Date()) {
+  if (!state.plan) return null;
+  if (!state.plan.weekStart) return today.getDay() === 0 ? 1 : 0;
+  const start = dateFromKey(state.plan.weekStart);
+  return start ? weeksBetween(planningMonday(today), start) : null;
+}
+
+// The plan + dates for the week currently being viewed (offset 0 = planning week).
 function viewedPlan() {
-  if (state.weekOffset === 0) return state.plan;
-  const names = state.history[state.weekOffset - 1];
+  const planOffset = storedPlanOffset();
+  if (planOffset === state.weekOffset) return state.plan;
+  if (planOffset === null || state.weekOffset <= planOffset) return null;
+  const names = state.history[state.weekOffset - planOffset - 1];
   return names ? planFromNames(names) : null;
 }
 function viewedDates() {
-  return weekDates(addDays(mondayOf(new Date()), -7 * state.weekOffset));
+  return weekDates(addDays(planningMonday(new Date()), -7 * state.weekOffset));
+}
+function maxPastOffset() {
+  const planOffset = storedPlanOffset();
+  return planOffset === null ? state.history.length : planOffset + state.history.length;
 }
 
 function paintTabIcons() {
@@ -76,7 +94,7 @@ function showScreen(name) {
 
 function renderBanner() {
   const el = $('#plan-banner');
-  const r = state.plan?.relaxations || [];
+  const r = viewedPlan()?.relaxations || [];
   if (state.error) { el.innerHTML = `<div class="banner warn">${state.error}</div>`; return; }
   if (r.includes('insufficient')) {
     el.innerHTML = `<div class="banner warn">Not enough meals in the Sheet yet to build a full week. Add more and reload.</div>`;
@@ -96,9 +114,9 @@ function renderPlan() {
   const readOnly = offset > 0 || locked;
 
   // Week-nav header.
-  $('#week-rel').textContent = relativeLabel(offset);
+  $('#week-rel').textContent = relativeLabel(offset, new Date());
   $('#week-range').textContent = formatRange(dates);
-  $('#btn-week-back').disabled = offset >= state.history.length;
+  $('#btn-week-back').disabled = offset >= maxPastOffset();
   $('#btn-week-fwd').disabled = offset === 0;
 
   // Relaxation banner only on the current week (stays visible even when locked).
@@ -108,8 +126,8 @@ function renderPlan() {
   if (!plan || plan.days.length === 0) {
     cards.innerHTML = `<p class="empty">Tap "Generate week" to plan your dinners.</p>`;
     $('#week-strip').innerHTML = '';
-    $('#btn-generate').hidden = false;
-    $('#btn-generate').disabled = false;
+    $('#btn-generate').hidden = offset !== 0;
+    $('#btn-generate').disabled = offset !== 0;
     $('#btn-lock').hidden = true;
     $('#healthy-meter').textContent = '';
     return;
@@ -136,12 +154,13 @@ function renderLockButton(offset, locked) {
 
 function renderShopping() {
   const el = $('#shopping-list');
-  if (!state.plan || state.plan.days.length === 0) {
+  const plan = storedPlanOffset() === 0 ? state.plan : null;
+  if (!plan || plan.days.length === 0) {
     el.innerHTML = `<p class="empty">No plan yet — generate a week first.</p>`; return;
   }
   Promise.all([store.getStaples(), store.getChecked()]).then(([staples, checked]) => {
     const checkedSet = new Set(checked);
-    const groups = buildShoppingList(state.plan, staples);
+    const groups = buildShoppingList(plan, staples);
     if (groups.length === 0) { el.innerHTML = `<p class="empty">All eat-out this week — nothing to buy.</p>`; return; }
     el.innerHTML = groups.map((g) => `
       <h2 class="aisle-h">${g.aisle}</h2>
@@ -162,14 +181,17 @@ async function savePlan() {
 }
 
 async function onGenerate() {
-  state.weekOffset = 0; // generating always returns to the current week
+  state.weekOffset = 0; // generating always returns to the planning week
   // Avoid the week currently on screen (treat it as the most-recent history entry)
   // plus the stored older weeks; bias by ratings.
   const current = (state.plan && state.plan.days.length)
     ? state.plan.days.map((d) => d.meal.meal)
     : null;
   const historyForGen = current ? [current, ...state.history] : state.history;
-  state.plan = generateWeek(state.meals, historyForGen, { ratings: state.ratings });
+  state.plan = {
+    ...generateWeek(state.meals, historyForGen, { ratings: state.ratings }),
+    weekStart: dateKey(planningMonday(new Date())),
+  };
   if (current) state.history = await store.pushHistory(current);
   await savePlan();
   renderPlan();
@@ -239,7 +261,7 @@ function wireEvents() {
     savePlan(); renderPlan();
   });
   $('#btn-week-back').addEventListener('click', () => {
-    if (state.weekOffset < state.history.length) { state.weekOffset++; renderPlan(); }
+    if (state.weekOffset < maxPastOffset()) { state.weekOffset++; renderPlan(); }
   });
   $('#btn-week-fwd').addEventListener('click', () => {
     if (state.weekOffset > 0) { state.weekOffset--; renderPlan(); }
